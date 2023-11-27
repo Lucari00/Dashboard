@@ -29,7 +29,9 @@ async def main():
     ]
 
     # Générez des couleurs aléatoires pour chaque commune
-    couleurs_par_commune = {commune: random.choice(list(folium.Icon.color_options)) for commune in communes_hauts_de_seine}
+    couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
+    couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for commune in communes_hauts_de_seine}
+
 
     accident['date'] = pd.to_datetime(accident['date'])
 
@@ -45,7 +47,8 @@ async def main():
 
     for index, row in accidentYearMonth.iterrows():
         popup_content = f"<br>Date: {row['date']}<br>Heure: {row['heure']}"
-        color = couleurs_par_commune.get(row['commune'])
+        color = couleurs_par_commune.get(row['commune'], 'blue')
+        # print(color)
         folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
 
     # Sauvegardez la carte dans un fichier HTML.

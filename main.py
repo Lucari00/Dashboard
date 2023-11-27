@@ -6,8 +6,25 @@ import random
 from get_data import get_data
 import asyncio
 from dash import Dash, dcc, html, Input, Output, callback
+import calendar
 
 app = Dash(__name__)
+
+# Liste des noms des 36 communes des Hauts-de-Seine
+communes_hauts_de_seine = [
+    "Antony", "Asnières-sur-Seine", "Bagneux", "Bois-Colombes",
+    "Boulogne-Billancourt", "Bourg-la-Reine", "Châtenay-Malabry", "Châtillon",
+    "Clamart", "Clichy", "Colombes", "Courbevoie", "Fontenay-aux-Roses",
+    "Garches", "La Garenne-Colombes", "Gennevilliers", "Issy-les-Moulineaux",
+    "Levallois-Perret", "Malakoff", "Marnes-la-Coquette", "Meudon", "Montrouge",
+    "Nanterre", "Neuilly-sur-Seine", "Puteaux", "Rueil-Malmaison", "Saint-Cloud",
+    "Sceaux", "Sèvres", "Suresnes", "Vanves", "Vaucresson", "Ville-d'Avray", "Villeneuve-la-Garenne"
+]
+
+# Générez des couleurs aléatoires pour chaque commune
+couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
+couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for commune in communes_hauts_de_seine}
+
 
 async def main():
     try:
@@ -30,36 +47,49 @@ async def main():
 
     app.layout = html.Div(children=[
 
-        html.H1(children='Carte des accidents de la route dans les Hauts-de-Seine en avril 2019',
+        html.H1(id="title-dash", children='Carte des accidents de la route dans les Hauts-de-Seine en avril 2019',
                 style={'textAlign': 'center', 'color': "#503D36"}),
-        html.Div(children='''Cette carte représente les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
+        html.Div(id="title-map", children='''Cette carte représente les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
                 style={'textAlign': 'center', 'color': "#503D36"}),
-        html.Div(children=[html.Iframe(id='map', srcDoc=None, width='100%', height='500')]),
-        html.Div(id='text'),
+        html.Div(children=[html.Iframe(id='map', srcDoc=None, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
+        html.Div(id='text-number-accident', style={'textAlign': 'center', 'color': "#503D36"}),
 
-        dcc.Dropdown(
-            id='year-dropdown',
-            options=[
-                {'label': str(year), 'value': year} for year in sorted(accident['date'].dt.year.unique())
-            ],
-            value=2019,  # Valeur par défaut
-            style={'width': '50%'}
-        ),
+        html.Div(id="container-change-date", 
+            children=['''Choisissez une année et un mois pour afficher les accidents de la route.''',
+                html.Div(
+                    children=[
+                        dcc.Dropdown(
+                            id='month-dropdown',
+                            options=[
+                                {'label': month, 'value': pd.to_datetime(month, format='%B').month} for month in sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month)
+                            ],
+                            value=4,  # Valeur par défaut
+                            style={'width': '100px'},
+                            clearable=False
+                        ),
 
-        # Menu sélectif pour choisir le mois
-        dcc.Dropdown(
-            id='month-dropdown',
-            options=[
-                {'label': month, 'value': pd.to_datetime(month, format='%B').month} for month in sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month)
-            ],
-            value=4,  # Valeur par défaut
-            style={'width': '50%'}
-        ),
+                        dcc.Dropdown(
+                            id='year-dropdown',
+                            options=[
+                                {'label': str(year), 'value': year} for year in sorted(accident['date'].dt.year.unique())
+                            ],
+                            value=2019,  # Valeur par défaut
+                            style={'width': '100px'},
+                            clearable=False
+                        ),
+                    ], 
+                    style={'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center'}
+                ),
+            ], 
+            style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%'}
+        )
     ])
 
 @app.callback(
     Output(component_id='map', component_property='srcDoc'),
-    Output(component_id='text', component_property='children'),
+    Output(component_id='text-number-accident', component_property='children'),
+    Output(component_id='title-dash', component_property='children'),
+    Output(component_id='title-map', component_property='children'),
     Input(component_id='year-dropdown', component_property='value'),
     Input(component_id='month-dropdown', component_property='value')
 )
@@ -73,24 +103,12 @@ def update_map(year, month):
     accidentYear = accident[accident['date'].dt.year == year]
     accidentYearMonth = accidentYear[accidentYear['date'].dt.month == month]
 
-    return m, f'''Nombre d'accidents: {len(accidentYearMonth)}'''
+    # récupérer le nom du mois en français
+    month_name = calendar.month_name[month]
+
+    return m, f'''Nombre d'accidents: {len(accidentYearMonth)}''', f'''Carte des accidents de la route dans les Hauts-de-Seine en {month_name} {year}''', f'''Cette carte représente les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.'''
 
 def create_map(data, year, month):
-    # Liste des noms des 36 communes des Hauts-de-Seine
-    communes_hauts_de_seine = [
-        "Antony", "Asnières-sur-Seine", "Bagneux", "Bois-Colombes",
-        "Boulogne-Billancourt", "Bourg-la-Reine", "Châtenay-Malabry", "Châtillon",
-        "Clamart", "Clichy", "Colombes", "Courbevoie", "Fontenay-aux-Roses",
-        "Garches", "La Garenne-Colombes", "Gennevilliers", "Issy-les-Moulineaux",
-        "Levallois-Perret", "Malakoff", "Marnes-la-Coquette", "Meudon", "Montrouge",
-        "Nanterre", "Neuilly-sur-Seine", "Puteaux", "Rueil-Malmaison", "Saint-Cloud",
-        "Sceaux", "Sèvres", "Suresnes", "Vanves", "Vaucresson", "Ville-d'Avray", "Villeneuve-la-Garenne"
-    ]
-
-    # Générez des couleurs aléatoires pour chaque commune
-    couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
-    couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for commune in communes_hauts_de_seine}
-
     accidentYear = data[data['date'].dt.year == year]
     accidentYearMonth = accidentYear[accidentYear['date'].dt.month == month]
 

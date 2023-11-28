@@ -48,10 +48,10 @@ async def main():
 
     app.layout = html.Div(children=[
 
-        html.H1(id="title-dash", children='Carte des accidents de la route dans les Hauts-de-Seine en avril 2019',
+        html.H1(id="title-dash", children='Dashboard des accidents de la route dans les Hauts-de-Seine',
                 style={'textAlign': 'center', 'color': "#503D36"}),
-        html.Div(id="title-map", children='''Cette carte représente les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
-                style={'textAlign': 'center', 'color': "#503D36"}),
+        html.H2(id="title-map", children='''Carte représentant les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
+                style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
         html.Div(children=[html.Iframe(id='map', srcDoc=None, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
         html.Div(id='text-number-accident', children=["Nombre d'accidents: "], style={'textAlign': 'center', 'color': "#503D36"}),
 
@@ -142,7 +142,6 @@ def update_histogramme(year):
 @app.callback(
     Output(component_id='map', component_property='srcDoc'),
     Output(component_id='text-number-accident', component_property='children'),
-    Output(component_id='title-dash', component_property='children'),
     Output(component_id='title-map', component_property='children'),
     Input(component_id='year-dropdown', component_property='value'),
     Input(component_id='month-dropdown', component_property='value')
@@ -156,7 +155,7 @@ def update_map(year, month):
     # récupérer le nom du mois en français
     month_name = calendar.month_name[month]
 
-    return m, f'''Nombre d'accidents: {len(accidentYearMonth)}''', f'''Carte des accidents de la route dans les Hauts-de-Seine en {month_name} {year}''', f'''Cette carte représente les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.'''
+    return m, f'''Nombre d'accidents: {len(accidentYearMonth)}''', f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.'''
 
 def create_map(data, year, month):
     accident_year = data[data['date'].dt.year == year]

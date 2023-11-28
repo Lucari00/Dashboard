@@ -2,6 +2,7 @@ import geopandas
 from os import path, makedirs
 import urllib.request
 import asyncio
+import requests
 
 async def get_data():
     if (not path.exists("data/")):
@@ -12,7 +13,12 @@ async def get_data():
         await get_data_from_internet("https://www.data.gouv.fr/fr/datasets/r/19b9f9d1-e24b-47f5-b908-e287339173b3", "data/BigAccidents.geojson")
         lighten_data()
     else:
-        print("Le fichier léger existe déjà !")
+        print("Le fichier LightAccidents existe déjà !")
+
+    if (not path.exists("data/communes-92-hauts-de-seine.geojson")):
+        await get_data_from_internet("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/92-hauts-de-seine/communes-92-hauts-de-seine.geojson", "data/communes-92-hauts-de-seine.geojson")
+    else:
+        print("Le fichier communes-92-hauts-de-seine existe déjà !")
 
 def lighten_data():
     print("Lecture du fichier (Cela peut prendre quelques temps, fichiers lourds)...")

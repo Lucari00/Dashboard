@@ -7,6 +7,7 @@ from get_data import get_data
 import asyncio
 from dash import Dash, dcc, html, Input, Output, callback
 import calendar
+import plotly.graph_objects as go
 
 app = Dash(__name__)
 
@@ -82,6 +83,27 @@ async def main():
                 ),
             ], 
             style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%'}
+        ),
+
+        dcc.Graph(
+            id='graph-accident',
+            figure={
+                'data': [
+                    go.Bar(
+                        x=sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month),
+                        y=accident.groupby(accident['date'].dt.month)['date'].count(),
+                        name='Nombre d\'accidents',
+                        marker=go.bar.Marker(
+                            color='rgb(55, 83, 109)'
+                        )
+                    )
+                ],
+                'layout': go.Layout(
+                    title='Nombre d\'accidents par mois',
+                    xaxis={'title': 'Mois'},
+                    yaxis={'title': 'Nombre d\'accidents'}
+                )
+            }
         )
     ])
 

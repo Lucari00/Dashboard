@@ -28,7 +28,9 @@ couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for com
 
 
 async def main():
+    global accident
     try:
+        global accident
         accident = geopandas.read_file("data/LightAccidents.geojson")
     except:
         print("Le fichier léger n'existe pas, exécution de la commande get_data.py...")
@@ -117,18 +119,27 @@ async def main():
                     step=None
                 ),
             ],
-            
-        )
+        ),
+        dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
     ])
+
+@callback(
+        Output('year-slider', 'value'),
+        Input('interval', 'n_intervals')
+    )
+def on_tick(n_intervals):
+    if n_intervals is None: return 0
+    years = sorted(accident['date'].dt.year.unique())
+    return years[(n_intervals + 1)%len(years)]
 
 @app.callback(
     Output(component_id='histogramme-accident', component_property='figure'),
     Input(component_id='year-slider', component_property='value')
 )
 def update_histogramme(year):
-    accident = geopandas.read_file("data/LightAccidents.geojson")
+    # accident = geopandas.read_file("data/LightAccidents.geojson")
 
-    accident['date'] = pd.to_datetime(accident['date'])
+    # accident['date'] = pd.to_datetime(accident['date'])
     accident_year = accident[accident['date'].dt.year == year]
 
     return {
@@ -158,9 +169,9 @@ def update_histogramme(year):
     Input(component_id='month-dropdown', component_property='value')
 )
 def update_map(year, month):
-    accident = geopandas.read_file("data/LightAccidents.geojson")
+    # accident = geopandas.read_file("data/LightAccidents.geojson")
 
-    accident['date'] = pd.to_datetime(accident['date'])
+    # accident['date'] = pd.to_datetime(accident['date'])
 
     m = create_map(accident, year, month)
 

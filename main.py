@@ -36,15 +36,15 @@ async def main():
         accident = geopandas.read_file("data/LightAccidents.geojson")
     
     # print("Création de la carte...")
-    # base_month = 4
-    # base_year = 2019
+    base_month = 4
+    base_year = 2019
 
     # m = create_map(accident, base_year, base_month)
 
-    # accident_base_year = accident[accident['date'].dt.year == base_year]
-    # accident_base_year_month = accident_base_year[accident_base_year['date'].dt.month == base_month]
-
     accident['date'] = pd.to_datetime(accident['date'])
+
+    accident_base_year = accident[accident['date'].dt.year == base_year]
+    accident_base_year_month = accident_base_year[accident_base_year['date'].dt.month == base_month]
 
     app.layout = html.Div(children=[
 
@@ -86,12 +86,12 @@ async def main():
         ),
 
         dcc.Graph(
-            id='graph-accident',
+            id='histogramme-accident',
             figure={
                 'data': [
                     go.Bar(
                         x=sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month),
-                        y=accident.groupby(accident['date'].dt.month)['date'].count(),
+                        y=accident_base_year_month.groupby(accident_base_year_month['date'].dt.month)['date'].count(),
                         name='Nombre d\'accidents',
                         marker=go.bar.Marker(
                             color='rgb(55, 83, 109)'
@@ -104,8 +104,50 @@ async def main():
                     yaxis={'title': 'Nombre d\'accidents'}
                 )
             }
+        ),
+
+        html.Div(id="container-change-date-slider",
+            children=[
+                dcc.Slider(
+                    id='year-slider',
+                    min=accident['date'].dt.year.min(),
+                    max=accident['date'].dt.year.max(),
+                    value=base_year,
+                    marks={str(year): str(year) for year in accident['date'].dt.year.unique()},
+                    step=None
+                ),
+            ],
+            
         )
     ])
+
+@app.callback(
+    Output(component_id='histogramme-accident', component_property='figure'),
+    Input(component_id='year-slider', component_property='value')
+)
+def update_histogramme(year):
+    accident = geopandas.read_file("data/LightAccidents.geojson")
+
+    accident['date'] = pd.to_datetime(accident['date'])
+    accident_year = accident[accident['date'].dt.year == year]
+
+    return {
+        'data': [
+            go.Bar(
+                x=sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month),
+                y=accident_year.groupby(accident_year['date'].dt.month)['date'].count(),
+                name='Nombre d\'accidents',
+                marker=go.bar.Marker(
+                    color='rgb(55, 83, 109)'
+                )
+            )
+        ],
+        'layout': go.Layout(
+            title=f'Nombre d\'accidents par mois en {year}',
+            xaxis={'title': 'Mois'},
+            yaxis={'title': 'Nombre d\'accidents'}
+        )
+    }
 
 @app.callback(
     Output(component_id='map', component_property='srcDoc'),

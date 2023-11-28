@@ -13,7 +13,7 @@ Assurez-vous d'avoir les éléments suivants installés sur votre machine :
 
 ### Étapes d'installation
 
-1. Téléchargez le code source du dashboard depuis le [repository GitHub](lien_vers_le_repo).
+1. Téléchargez le code source du dashboard depuis le [repository GitHub]().
 
 2. Naviguez vers le répertoire du projet via le terminal ou l'invite de commande.
 

@@ -29,13 +29,15 @@ couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for com
 
 async def main():
     global accident
+    global geo_data_92
     try:
-        global accident
         accident = geopandas.read_file("data/LightAccidents.geojson")
+        geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
     except:
         print("Le fichier léger n'existe pas, exécution de la commande get_data.py...")
         await get_data()
         accident = geopandas.read_file("data/LightAccidents.geojson")
+        geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
     
     # print("Création de la carte...")
     base_month = 4
@@ -43,8 +45,10 @@ async def main():
 
     accident['date'] = pd.to_datetime(accident['date'])
 
-    accident_base_year = accident[accident['date'].dt.year == base_year]
-    accident_base_year_month = accident_base_year[accident_base_year['date'].dt.month == base_month]
+    # accident_base_year = accident[accident['date'].dt.year == base_year]
+    # accident_base_year_month = accident_base_year[accident_base_year['date'].dt.month == base_month]
+
+    choropleth_map = create_choropleth_map()
 
     app.layout = html.Div(children=[
 
@@ -103,6 +107,11 @@ async def main():
             ],
         ),
         dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
+
+        html.H2(id="title-map-choropleth", children='''Carte choroplèthe représentant le nombre d'accidents par commune.''',
+                style={'textAlign': 'center', 'color': "#503D36"}),
+
+        html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
     ])
 
 @callback(
@@ -169,6 +178,28 @@ def create_map(data, year, month):
         popup_content = f"Date: {row['date'].date()}<br>Heure: {row['heure']}"
         color = couleurs_par_commune.get(row['commune'], 'blue')
         folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
+
+    return m._repr_html_()
+
+def create_choropleth_map():
+    center_lat = accident['geometry'].apply(lambda geom: geom.y).mean()
+    center_lon = accident['geometry'].apply(lambda geom: geom.x).mean()
+
+    m = folium.Map(location=[center_lat,center_lon], zoom_start=13)
+
+    accident_count = accident.groupby('code_insee').size().reset_index(name='nbAccidents')
+
+    folium.Choropleth(
+        geo_data=geo_data_92,                              # geographical data
+        name='choropleth',
+        data=accident_count,                                  # numerical data
+        columns=['code_insee', 'nbAccidents'],                     # numerical data key/value pair
+        key_on='feature.properties.code',       # geographical property used to establish correspondance with numerical data
+        fill_color='YlOrRd',  
+        fill_opacity=0.7,
+        line_opacity=0.2,
+        legend_name='Nombre d\'accidents'
+    ).add_to(m)
 
     return m._repr_html_()
 

@@ -77,5 +77,3 @@ def get_scraping_data(schools_number=3, regenerate=False):
         print("Terminé !")
     else:
         print("Le fichier DrivingSchools existe déjà !")
-
-get_scraping_data(regenerate=True)

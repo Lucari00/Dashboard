@@ -37,7 +37,7 @@ def get_cities():
         driver.quit()
     return cities
 
-def get_driving_schools(schools_number=3):
+def get_driving_schools(schools_number=38):
     cities = get_cities()
 
     auto_ecoles = geopandas.GeoDataFrame(columns=["nom", "position", "note", "geometry"])
@@ -64,18 +64,15 @@ def get_driving_schools(schools_number=3):
             print(e)
             driver.quit()
 
-    auto_ecoles.to_file("data/DrivingSchools.geojson", driver="GeoJSON")
+    auto_ecoles.to_file("data/driving_schools.geojson", driver="GeoJSON")
 
-async def get_scraping_data(schools_number=38, regenerate=False):
-    if ((not path.exists("data/DrivingSchools.geojson")) or regenerate):
-        print("Récupération des données des auto écoles...")
-        global driver
-        driver = create_chrome_browser()
-        get_driving_schools(schools_number)
-        driver.quit()
-        print("Terminé !")
-    else:
-        print("Le fichier DrivingSchools existe déjà !")
+def get_scraping_data():
+    print("Récupération des données des auto écoles...")
+    global driver
+    driver = create_chrome_browser()
+    get_driving_schools()
+    driver.quit()
+    print("Scrapping terminé !")
 
 
 if __name__ == "__main__":

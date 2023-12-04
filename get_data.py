@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import geopandas
 from os import path, makedirs
 import urllib.request
@@ -12,38 +13,48 @@ async def get_data():
     if (not path.exists("data/")):
         makedirs("data/")
 
-    if (not path.exists("data/BigAccidents.geojson")):
-        await get_data_from_internet("https://www.data.gouv.fr/fr/datasets/r/19b9f9d1-e24b-47f5-b908-e287339173b3", "data/BigAccidents.geojson")
-    else:
-        print("Le fichier BigAccidents existe déjà !")
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        if not path.exists("data/big_accidents.geojson"):
+            executor.submit(get_data_from_internet, "https://www.data.gouv.fr/fr/datasets/r/19b9f9d1-e24b-47f5-b908-e287339173b3", "data/big_accidents.geojson", "big_accidents", True)
+        else:
+            print("Le fichier big_accidents existe déjà !")
+
+        if not path.exists("data/communes-92-hauts-de-seine.geojson"):
+            executor.submit(get_data_from_internet, "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/92-hauts-de-seine/communes-92-hauts-de-seine.geojson", "data/communes-92-hauts-de-seine.geojson", "communes-92-hauts-de-seine", False)
+        else:
+            print("Le fichier communes-92-hauts-de-seine existe déjà !")
+
+        if not path.exists("data/driving_schools.geojson"):
+            executor.submit(get_scraping_data)
+        else:
+            print("Le fichier driving_schools existe déjà !")
+
         
-    if (not path.exists("data/LightAccidents.geojson")):
-        lighten_data()
-    else:
-        print("Le fichier LightAccidents existe déjà !")
-
-    if (not path.exists("data/communes-92-hauts-de-seine.geojson")):
-        await get_data_from_internet("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/92-hauts-de-seine/communes-92-hauts-de-seine.geojson", "data/communes-92-hauts-de-seine.geojson")
-    else:
-        print("Le fichier communes-92-hauts-de-seine existe déjà !")
-
-    await get_scraping_data(schools_number=30, regenerate=False)
+    # if (not path.exists("data/light_accident.geojson")):
+    #     lighten_data()
+    # else:
+    #     print("Le fichier light_accident existe déjà !")
 
 def lighten_data():
-    print("Lecture du fichier (Cela peut prendre quelques temps, fichiers lourds)...")
-    accident = geopandas.read_file("data/BigAccidents.geojson")
+    print("Lecture du fichier big_accidents (Cela peut prendre quelques temps, fichiers lourds)...")
+    accident = geopandas.read_file("data/big_accidents.geojson")
 
     # créer le fichier léger
-    print("Création du fichier léger...")
+    print("Création du fichier léger de big_accident...")
     new_columns = ['date', 'heure', 'commune', 'geometry', 'code_insee', 'type_colli']
     accident = accident[new_columns]
-    accident.to_file("data/LightAccidents.geojson", driver='GeoJSON')
-    print("Terminé !")
+    accident.to_file("data/light_accidents.geojson", driver='GeoJSON')
+    print("big_accidents allégé !")
 
-async def get_data_from_internet(url, filename):
-    print("Début du téléchargement (Cela peut prendre quelques temps, fichiers lourds)...")
-    urllib.request.urlretrieve(url, filename)
-    print("Fin du téléchargement !")
+def get_data_from_internet(url, path, filename, lourd, executor=None):
+    if (lourd):
+        print(f"Début du téléchargement de {filename} (Cela peut prendre quelques temps, fichiers lourds)...")
+    else:
+        print(f"Début du téléchargement de {filename} (fichier léger)...")
+    urllib.request.urlretrieve(url, path)
+    print(f"Fin du téléchargement de {filename}!")
+    if (lourd):
+        lighten_data()
 
 if __name__ == "__main__":
     asyncio.run(get_data())

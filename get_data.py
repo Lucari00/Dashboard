@@ -3,6 +3,7 @@ from os import path, makedirs
 import urllib.request
 import asyncio
 import ssl
+from scraping import get_scraping_data
 
 # Pour éviter les erreurs de certificat sur le réseau de l'ESIEE
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -12,7 +13,7 @@ async def get_data():
         makedirs("data/")
 
     if (not path.exists("data/BigAccidents.geojson")):
-        await get_data_from_internet("https://www.data.gouv.fr/fr/datasets/r/5c4f3f0f-1a6c-4f6f-9b2e-9a2a6b0b9e2f", "data/BigAccidents.geojson")
+        await get_data_from_internet("https://www.data.gouv.fr/fr/datasets/r/19b9f9d1-e24b-47f5-b908-e287339173b3", "data/BigAccidents.geojson")
     else:
         print("Le fichier BigAccidents existe déjà !")
         
@@ -25,6 +26,8 @@ async def get_data():
         await get_data_from_internet("https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/92-hauts-de-seine/communes-92-hauts-de-seine.geojson", "data/communes-92-hauts-de-seine.geojson")
     else:
         print("Le fichier communes-92-hauts-de-seine existe déjà !")
+
+    await get_scraping_data(schools_number=30, regenerate=False)
 
 def lighten_data():
     print("Lecture du fichier (Cela peut prendre quelques temps, fichiers lourds)...")

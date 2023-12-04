@@ -33,11 +33,13 @@ async def main():
     try:
         accident = geopandas.read_file("data/LightAccidents.geojson")
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
+        driving_schools = geopandas.read_file("data/DrivingSchools.geojson")
     except:
-        print("Le fichier léger n'existe pas, exécution de la commande get_data.py...")
+        print("Il manque au moins un fichier, exécution de la commande get_data.py (cela peut prendre quelques minutes, tout le processus est détaillé)...")
         await get_data()
         accident = geopandas.read_file("data/LightAccidents.geojson")
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
+        driving_schools = geopandas.read_file("data/DrivingSchools.geojson")
     
     # print("Création de la carte...")
     base_month = 4

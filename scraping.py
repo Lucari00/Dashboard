@@ -1,3 +1,4 @@
+import asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -7,7 +8,6 @@ from selenium.webdriver.firefox.options import Options
 import geopandas
 from shapely.geometry import Point
 from os import path
-import random
 
 def wait_for_element_loading(driver, class_name, timeout=120):
     WebDriverWait(driver, timeout).until(
@@ -22,7 +22,6 @@ def create_chrome_browser():
     return webdriver.Chrome(options=options)
 
 def get_cities():
-    driver = create_chrome_browser()
     driver.get("https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/")
     department_class = "vv-department__link"
     cities = []
@@ -32,22 +31,19 @@ def get_cities():
         cities = [element.get_attribute("href")for element in elements]
     except TimeoutException:
         print(f"Couldn't load page {driver.current_url}")
+        driver.quit()
     except Exception as e:
         print(e)
-    finally:
         driver.quit()
     return cities
 
-def get_random_driving_schools(schools_number=3):
+def get_driving_schools(schools_number=3):
     cities = get_cities()
 
     auto_ecoles = geopandas.GeoDataFrame(columns=["nom", "position", "note", "geometry"])
-
-    random.seed()
-    driver = create_chrome_browser()
-    for _ in range(schools_number):
-        random_school = random.randint(0, len(cities) - 1)
-        city_link = cities[random_school]
+    
+    for i in range(schools_number):
+        city_link = cities[i]
         print(city_link)
         driver.get(city_link)
         try:
@@ -67,18 +63,21 @@ def get_random_driving_schools(schools_number=3):
         except Exception as e:
             print(e)
             driver.quit()
-    driver.quit()
 
     auto_ecoles.to_file("data/DrivingSchools.geojson", driver="GeoJSON")
 
-def get_scraping_data(schools_number=3, regenerate=False):
+async def get_scraping_data(schools_number=38, regenerate=False):
     if ((not path.exists("data/DrivingSchools.geojson")) or regenerate):
         print("Récupération des données des auto écoles...")
-        get_random_driving_schools(schools_number)
+        global driver
+        driver = create_chrome_browser()
+        get_driving_schools(schools_number)
+        driver.quit()
         print("Terminé !")
     else:
         print("Le fichier DrivingSchools existe déjà !")
 
 
 if __name__ == "__main__":
-    get_scraping_data(schools_number=3, regenerate=False)
+    asyncio.run(get_scraping_data(schools_number=30, regenerate=True))
+    

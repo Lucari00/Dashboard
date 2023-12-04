@@ -29,18 +29,11 @@ async def get_data():
         else:
             print("Le fichier driving_schools existe déjà !")
 
-        
-    # if (not path.exists("data/light_accident.geojson")):
-    #     lighten_data()
-    # else:
-    #     print("Le fichier light_accident existe déjà !")
-
 def lighten_data():
     print("Lecture du fichier big_accidents (Cela peut prendre quelques temps, fichiers lourds)...")
     accident = geopandas.read_file("data/big_accidents.geojson")
 
-    # créer le fichier léger
-    print("Création du fichier léger de big_accident...")
+    print("Création du fichier léger de big_accidents...")
     new_columns = ['date', 'heure', 'commune', 'geometry', 'code_insee', 'type_colli']
     accident = accident[new_columns]
     accident.to_file("data/light_accidents.geojson", driver='GeoJSON')

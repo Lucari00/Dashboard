@@ -1,4 +1,5 @@
 import json
+import time
 import geojson, geopandas, pandas as pd
 import folium
 from os import path
@@ -30,25 +31,29 @@ couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for com
 async def main():
     global accident
     global geo_data_92
+    global driving_schools
     try:
-        accident = geopandas.read_file("data/LightAccidents.geojson")
+        accident = geopandas.read_file("data/light_accidents.geojson")
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
-        driving_schools = geopandas.read_file("data/DrivingSchools.geojson")
+        driving_schools = geopandas.read_file("data/driving_schools.geojson")
     except:
-        print("Il manque au moins un fichier, exécution de la commande get_data.py (cela peut prendre quelques minutes, tout le processus est détaillé)...")
+        print("Il manque au moins un fichier, exécution de la commande get_data.py")
+        print("Pour récupérer les données, les fonctions fonctionnent sur différents threads, ce qui permet de gagner du temps.")
+        print("Dans de bonnes conditions, le temps d'exécution est d'environ 2 minutes...")
+        start = time.time()
         await get_data()
-        accident = geopandas.read_file("data/LightAccidents.geojson")
+        print(f"Temps d'exécution: {time.time() - start} secondes")
+        print("Lectures des données...")
+
+        accident = geopandas.read_file("data/light_accidents.geojson")
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
-        driving_schools = geopandas.read_file("data/DrivingSchools.geojson")
+        driving_schools = geopandas.read_file("data/driving_schools.geojson")
+        print("Création du dashboard...")
     
-    # print("Création de la carte...")
     base_month = 4
     base_year = 2019
 
     accident['date'] = pd.to_datetime(accident['date'])
-
-    # accident_base_year = accident[accident['date'].dt.year == base_year]
-    # accident_base_year_month = accident_base_year[accident_base_year['date'].dt.month == base_month]
 
     choropleth_map = create_choropleth_map()
 

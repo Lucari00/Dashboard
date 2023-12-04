@@ -44,11 +44,11 @@ def get_random_driving_schools(schools_number=3):
     auto_ecoles = geopandas.GeoDataFrame(columns=["nom", "position", "note", "geometry"])
 
     random.seed()
+    driver = create_chrome_browser()
     for _ in range(schools_number):
         random_school = random.randint(0, len(cities) - 1)
         city_link = cities[random_school]
         print(city_link)
-        driver = create_chrome_browser()
         driver.get(city_link)
         try:
             wait_for_element_loading(driver, "vv-search-item__content__title")
@@ -63,10 +63,11 @@ def get_random_driving_schools(schools_number=3):
                 auto_ecoles = auto_ecoles._append(dict, ignore_index=True)
         except TimeoutException:
             print(f"Couldn't load page {driver.current_url}")
+            driver.quit()
         except Exception as e:
             print(e)
-        finally:
             driver.quit()
+    driver.quit()
 
     auto_ecoles.to_file("data/DrivingSchools.geojson", driver="GeoJSON")
 
@@ -77,3 +78,7 @@ def get_scraping_data(schools_number=3, regenerate=False):
         print("Terminé !")
     else:
         print("Le fichier DrivingSchools existe déjà !")
+
+
+if __name__ == "__main__":
+    get_scraping_data(schools_number=3, regenerate=False)

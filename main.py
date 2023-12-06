@@ -193,14 +193,33 @@ def create_map(data, year, month):
     # Ajout des radars que du 92
     radars_92 = radars[radars['departement'] == '92']
     for index, row in radars_92.iterrows():
-        popup_content = f"Type: {row['type']}"
+        
         
         if (row['type'] == 'Radar feu rouge'):
             icon_name = 'assets/radar_feu_rouge.png'
+            popup_content = f"""
+            <div style='white-space: pre-wrap; width: 200px'>
+                <b>🚨 {row['type']}</b><br>
+                <b>🛣️ Route</b> : {row['route']}<br>
+            </div>
+            """
         else:
             icon_name = 'assets/radar_fixe.png'
+            popup_content = f"""
+            <div style='white-space: pre-wrap; width: 200px;'>
+                <b>🚨 {row['type']}</b><br>
+                <b>🛣️ Route</b> : {row['route']}<br>
+                <b>💨 Vitesse max</b> : {row['vitesse_vehicules_legers_kmh']} km/h
+            </div>
+            """
+
+            folium.Marker(
+                location=[row['latitude'], row['longitude']],
+                popup=folium.Popup(popup_content, max_width='100%'),
+                parse_html=True,
+            ).add_to(m)
         icon = folium.CustomIcon(icon_image=icon_name, icon_size=(64, 64))
-        folium.Marker(location=[row['latitude'], row['longitude']], popup=popup_content, parse_html=True, icon=icon).add_to(m)
+        folium.Marker(location=[row['latitude'], row['longitude']], popup=folium.Popup(popup_content, max_width='100%'), parse_html=True, icon=icon).add_to(m)
 
     return m._repr_html_()
 

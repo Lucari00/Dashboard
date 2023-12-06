@@ -2,6 +2,7 @@ import json
 import time
 import geojson, geopandas, pandas as pd
 import folium
+from folium.plugins import HeatMap
 from os import path
 import random
 from get_data import get_data
@@ -32,10 +33,12 @@ async def main():
     global accident
     global geo_data_92
     global driving_schools
+    global radars
     try:
         accident = geopandas.read_file("data/light_accidents.geojson")
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
         driving_schools = geopandas.read_file("data/driving_schools.geojson")
+        radars = pd.read_csv("data/radars.csv")
     except:
         print("Il manque au moins un fichier, exécution de la commande get_data.py")
         print("Pour récupérer les données, les fonctions fonctionnent sur différents threads, ce qui permet de gagner du temps.")
@@ -48,6 +51,7 @@ async def main():
         accident = geopandas.read_file("data/light_accidents.geojson")
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
         driving_schools = geopandas.read_file("data/driving_schools.geojson")
+        radars = pd.read_csv("data/radars.csv")
         print("Création du dashboard...")
     
     base_month = 4
@@ -185,6 +189,18 @@ def create_map(data, year, month):
         popup_content = f"Date: {row['date'].date()}<br>Heure: {row['heure']}"
         color = couleurs_par_commune.get(row['commune'], 'blue')
         folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
+
+    # Ajout des radars que du 92
+    radars_92 = radars[radars['departement'] == '92']
+    for index, row in radars_92.iterrows():
+        popup_content = f"Type: {row['type']}"
+        
+        if (row['type'] == 'Radar feu rouge'):
+            icon_name = 'assets/radar_feu_rouge.png'
+        else:
+            icon_name = 'assets/radar_fixe.png'
+        icon = folium.CustomIcon(icon_image=icon_name, icon_size=(64, 64))
+        folium.Marker(location=[row['latitude'], row['longitude']], popup=popup_content, parse_html=True, icon=icon).add_to(m)
 
     return m._repr_html_()
 

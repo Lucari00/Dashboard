@@ -40,7 +40,7 @@ def get_cities():
 def get_driving_schools(schools_number=38):
     cities = get_cities()
 
-    auto_ecoles = geopandas.GeoDataFrame(columns=["nom", "position", "note", "geometry"])
+    auto_ecoles = geopandas.GeoDataFrame(columns=["name", "position", "grade", "geometry"])
     
     for i in range(schools_number):
         city_link = cities[i]
@@ -55,7 +55,7 @@ def get_driving_schools(schools_number=38):
                 note = element.get_attribute("data-note")
                 coords = position.split(",")
                 geometry = Point(coords[0], coords[1])
-                dict = {"nom": name, "position": position, "note": note, "geometry": geometry }
+                dict = {"name": name, "position": position, "grade": note, "geometry": geometry }
                 auto_ecoles = auto_ecoles._append(dict, ignore_index=True)
         except TimeoutException:
             print(f"Couldn't load page {driver.current_url}")

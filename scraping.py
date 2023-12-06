@@ -37,13 +37,12 @@ def get_cities():
         driver.quit()
     return cities
 
-def get_driving_schools(schools_number=38):
+def get_driving_schools():
     cities = get_cities()
 
     auto_ecoles = geopandas.GeoDataFrame(columns=["name", "position", "grade", "geometry"])
     
-    for i in range(schools_number):
-        city_link = cities[i]
+    for city_link in cities:
         print(city_link)
         driver.get(city_link)
         try:
@@ -76,5 +75,5 @@ def get_scraping_data():
 
 
 if __name__ == "__main__":
-    asyncio.run(get_scraping_data(schools_number=30, regenerate=True))
+    asyncio.run(get_scraping_data())
     

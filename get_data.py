@@ -39,7 +39,7 @@ def lighten_data():
     accident = geopandas.read_file("data/big_accidents.geojson")
 
     print("Création du fichier léger de big_accidents...")
-    new_columns = ['date', 'heure', 'commune', 'geometry', 'code_insee', 'type_colli']
+    new_columns = ['date', 'heure', 'commune', 'geometry', 'code_insee', 'type_colli', 'type_acci', 'luminosite', 'adresse']
     accident = accident[new_columns]
     accident.to_file("data/light_accidents.geojson", driver='GeoJSON')
     print("big_accidents allégé !")

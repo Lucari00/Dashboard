@@ -1,4 +1,5 @@
 import json
+import math
 import time
 import geojson, geopandas, pandas as pd
 import folium
@@ -186,40 +187,53 @@ def create_map(data, year, month):
     m = folium.Map(location=[center_lat,center_lon], zoom_start=13)
 
     for index, row in accident_year_month.iterrows():
-        popup_content = f"Date: {row['date'].date()}<br>Heure: {row['heure']}"
+        popup_content = f"""
+        <div style='white-space: pre-wrap; width: 200px;'>
+            <b>📍 Adresse</b> : {row['adresse']}<br>  
+            <b>📅 Date</b> : {row['date'].date()}<br>
+            <b>🕐 Heure</b> : {row['heure']}<br>
+            <b>🚗 Accident</b> : {row['type_acci']}
+            <b>🚨 Collision</b> : {row['type_colli']}<br>
+        """
+        if "Nuit" in row['luminosite']:
+            emoji_lum = "🌑"
+        else:
+            emoji_lum = "☀️"
+
+        popup_content += f"         <b>{emoji_lum} Luminosité</b> : {row['luminosite']}"
         color = couleurs_par_commune.get(row['commune'], 'blue')
         folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
 
     # Ajout des radars que du 92
     radars_92 = radars[radars['departement'] == '92']
     for index, row in radars_92.iterrows():
-        
-        
-        if (row['type'] == 'Radar feu rouge'):
-            icon_name = 'assets/radar_feu_rouge.png'
-            popup_content = f"""
-            <div style='white-space: pre-wrap; width: 200px'>
-                <b>🚨 {row['type']}</b><br>
-                <b>🛣️ Route</b> : {row['route']}<br>
-            </div>
-            """
-        else:
-            icon_name = 'assets/radar_fixe.png'
-            popup_content = f"""
-            <div style='white-space: pre-wrap; width: 200px;'>
-                <b>🚨 {row['type']}</b><br>
-                <b>🛣️ Route</b> : {row['route']}<br>
-                <b>💨 Vitesse max</b> : {row['vitesse_vehicules_legers_kmh']} km/h
-            </div>
-            """
+        popup_content = f"""
+        <div style='white-space: pre-wrap; width: 200px;'>
+        """
 
-            folium.Marker(
-                location=[row['latitude'], row['longitude']],
-                popup=folium.Popup(popup_content, max_width='100%'),
-                parse_html=True,
-            ).add_to(m)
+        icon_name = 'assets/radar_fixe.png'
+
+        if (row['type'] != ''):
+            popup_content += f"<b>🚨 {row['type']}</b><br>"
+            if (row['type'] == 'Radar feu rouge'):
+                icon_name = 'assets/radar_feu_rouge.png'
+                
+
+        if not pd.isna(row['route']) and isinstance(row['route'], str):
+            popup_content += f"         <b>🛣️ Route</b> : {row['route']}<br>"
+
+        if not pd.isna(row['vitesse_vehicules_legers_kmh']) and isinstance(row['vitesse_vehicules_legers_kmh'], str):
+            popup_content += f"         <b>💨 Vitesse max</b> : {row['vitesse_vehicules_legers_kmh']} km/h<br>"
+
         icon = folium.CustomIcon(icon_image=icon_name, icon_size=(64, 64))
-        folium.Marker(location=[row['latitude'], row['longitude']], popup=folium.Popup(popup_content, max_width='100%'), parse_html=True, icon=icon).add_to(m)
+        folium.Marker(
+            location=[row['latitude'], row['longitude']],
+            popup=folium.Popup(popup_content, max_width='100%'),
+            parse_html=True,
+            icon=icon
+        ).add_to(m)
+        
+        # folium.Marker(location=[row['latitude'], row['longitude']], popup=folium.Popup(popup_content, max_width='100%'), parse_html=True, icon=icon).add_to(m)
 
     return m._repr_html_()
 

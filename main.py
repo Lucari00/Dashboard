@@ -106,18 +106,38 @@ async def main():
             figure={}
         ),
 
-        html.Div(id="container-change-date-slider",
-            children=[
-                dcc.Slider(
-                    id='year-slider',
-                    min=accident['date'].dt.year.min(),
-                    max=accident['date'].dt.year.max(),
-                    value=base_year,
-                    marks={str(year): str(year) for year in accident['date'].dt.year.unique()},
-                    step=None
-                ),
-            ],
+        dcc.Slider(
+            id='year-slider',
+            min=accident['date'].dt.year.min(),
+            max=accident['date'].dt.year.max(),
+            value=base_year,
+            marks={str(year): str(year) for year in accident['date'].dt.year.unique()},
+            step=None
         ),
+
+        html.Div(
+            children=[
+                html.Button(
+                    id='play-button', 
+                    children='▶️', 
+                    n_clicks=0, 
+                    style={
+                        'background-color': 'transparent',  # Button color
+                        'color': 'white',  # Text color
+                        'padding': '15px 32px',  # Top/bottom padding, left/right padding
+                        'text-align': 'center',  # Center the text
+                        'text-decoration': 'none',  # Remove underline
+                        'display': 'inline-block',  
+                        'font-size': '32px',  # Increase font size
+                        'margin': '4px 2px',  # Add some margin
+                        'border': 'none',  # Remove border
+                        'cursor': 'pointer',  # Add a hand cursor on hover
+                    }
+                )
+            ],
+            style={'display': 'flex', 'justify-content': 'center'}
+        ),
+
         dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
 
         html.H2(id="title-map-choropleth", children='''Carte choroplèthe représentant le nombre d'accidents par commune.''',
@@ -128,12 +148,16 @@ async def main():
 
 @callback(
         Output('year-slider', 'value'),
-        Input('interval', 'n_intervals')
+        Input('interval', 'n_intervals'),
+        State('year-slider', 'value')
     )
-def on_tick(n_intervals):
-    if n_intervals is None: return 0
+def on_tick(n_intervals, year):
+    # if n_intervals is None: return 0
+    # years = sorted(accident['date'].dt.year.unique())
+    # return years[(n_intervals + 1)%len(years)]
     years = sorted(accident['date'].dt.year.unique())
-    return years[(n_intervals + 1)%len(years)]
+    year_index = years.index(year)
+    return years[year_index + 1 if year_index + 1 < len(years) else 0]
 
 @app.callback(
     Output(component_id='histogramme-accident', component_property='figure'),
@@ -159,6 +183,19 @@ def update_histogramme(year):
             yaxis={'title': 'Nombre d\'accidents'}
         )
     }
+
+# je veux que le bouton play arrête le slider et change le texte du bouton en pause
+@app.callback(
+    Output('interval', 'disabled'),
+    Output('play-button', 'children'),
+    Input('play-button', 'n_clicks'),
+)
+def on_play_button_click(n_clicks):
+    if n_clicks is None: return False, '⏸️'
+    if n_clicks % 2 == 1:
+        return True, '▶️'
+    else:
+        return False, '⏸️'
 
 @app.callback(
     Output(component_id='map', component_property='srcDoc'),

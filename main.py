@@ -152,9 +152,6 @@ async def main():
         State('year-slider', 'value')
     )
 def on_tick(n_intervals, year):
-    # if n_intervals is None: return 0
-    # years = sorted(accident['date'].dt.year.unique())
-    # return years[(n_intervals + 1)%len(years)]
     years = sorted(accident['date'].dt.year.unique())
     year_index = years.index(year)
     return years[year_index + 1 if year_index + 1 < len(years) else 0]
@@ -184,7 +181,6 @@ def update_histogramme(year):
         )
     }
 
-# je veux que le bouton play arrête le slider et change le texte du bouton en pause
 @app.callback(
     Output('interval', 'disabled'),
     Output('play-button', 'children'),
@@ -294,6 +290,31 @@ def create_choropleth_map():
         line_opacity=0.2,
         legend_name='Nombre d\'accidents'
     ).add_to(m)
+
+    # ajout des auto-écoles
+    for index, row in driving_schools.iterrows():
+        popup_content = f"""
+<div style='white-space: pre-wrap; width: 200px;'>
+<b>🏫 Nom</b> : {row['name']}<br>
+<b>⭐ Note</b> : {row['grade']}/5
+"""
+        
+        folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=folium.Popup(popup_content, max_width='100%'), parse_html=True, icon=folium.Icon(color='green')).add_to(m)
+
+    legend_html = """
+<div style="position: fixed; 
+            top: 10px; 
+            left: 50px; 
+            width: 120px; 
+            border:2px solid grey; 
+            z-index:9999; 
+            font-size:14px;
+            background-color: white;">
+    <div style="color: green;">🏫 Driving School</div>
+</div>
+"""
+
+    m.get_root().html.add_child(folium.Element(legend_html))
 
     return m._repr_html_()
 

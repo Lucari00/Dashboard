@@ -7,19 +7,19 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.firefox.options import Options
 import geopandas
 from shapely.geometry import Point
-from os import path
+from os import makedirs
 
 def wait_for_element_loading(driver, class_name, timeout=120):
     WebDriverWait(driver, timeout).until(
         EC.presence_of_all_elements_located((By.CLASS_NAME, class_name))
     )    
 
-def create_chrome_browser():
+def create_firefox_browser():
     options = Options()
     # Pour cacher la fenêtre du navigateur
     options.add_argument("--headless")
     options.add_argument('--disable-blink-features=AutomationControlled')
-    return webdriver.Chrome(options=options)
+    return webdriver.Firefox(options=options)
 
 def get_cities():
     driver.get("https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/")
@@ -68,12 +68,18 @@ def get_driving_schools():
 def get_scraping_data():
     print("Récupération des données des auto écoles...")
     global driver
-    driver = create_chrome_browser()
+    try:
+        driver = create_firefox_browser()
+    except Exception as e:
+        driver = create_firefox_browser()
+
+    makedirs("data", exist_ok=True)
+
     get_driving_schools()
     driver.quit()
     print("Scrapping terminé !")
 
 
 if __name__ == "__main__":
-    asyncio.run(get_scraping_data())
+    get_scraping_data()
     

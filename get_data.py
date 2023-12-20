@@ -10,8 +10,7 @@ from scraping import get_scraping_data
 ssl._create_default_https_context = ssl._create_unverified_context
 
 async def get_data():
-    if (not path.exists("data/")):
-        makedirs("data/")
+    makedirs("data/", exist_ok=True)
 
     with ThreadPoolExecutor(max_workers=3) as executor:
         if not path.exists("data/big_accidents.geojson"):

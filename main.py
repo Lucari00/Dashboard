@@ -1,5 +1,4 @@
-import json
-import math
+
 import time
 import geojson, geopandas, pandas as pd
 import folium
@@ -177,7 +176,7 @@ def update_histogramme(year):
         'layout': go.Layout(
             title=f'Nombre d\'accidents par mois en {year}',
             xaxis={'title': 'Mois'},
-            yaxis={'title': 'Nombre d\'accidents'}
+            yaxis={'title': 'Nombre d\'accidents'},
         )
     }
 
@@ -267,8 +266,6 @@ def create_map(data, year, month):
             icon=icon
         ).add_to(m)
         
-        # folium.Marker(location=[row['latitude'], row['longitude']], popup=folium.Popup(popup_content, max_width='100%'), parse_html=True, icon=icon).add_to(m)
-
     return m._repr_html_()
 
 def create_choropleth_map():

@@ -102,7 +102,12 @@ async def main():
         ),
 
         dcc.Graph(
-            id='histogramme-accident',
+            id='histogramme-accidents',
+            figure={}
+        ),
+
+        dcc.Graph(
+            id='graphique-accidents-heures',
             figure={}
         ),
 
@@ -157,7 +162,7 @@ def on_tick(n_intervals, year):
     return years[year_index + 1 if year_index + 1 < len(years) else 0]
 
 @app.callback(
-    Output(component_id='histogramme-accident', component_property='figure'),
+    Output(component_id='histogramme-accidents', component_property='figure'),
     Input(component_id='year-slider', component_property='value')
 )
 def update_histogramme(year):
@@ -178,6 +183,33 @@ def update_histogramme(year):
             title=f'Nombre d\'accidents par mois en {year}',
             xaxis={'title': 'Mois'},
             yaxis={'title': 'Nombre d\'accidents'}
+        )
+    }
+
+@app.callback(
+    Output(component_id='graphique-accidents-heures', component_property='figure'),
+    Input(component_id='year-slider', component_property='value')
+)
+def update_graphique(year):
+    accident_year = accident[accident['date'].dt.year == year]
+    #trier par heure
+    accident_year = accident_year.sort_values(by=['heure'])
+    # nombre d'accidents par heure
+    heure = [int(hour[0:2]) for hour in accident_year['heure'].to_list()]
+    nombre_accident = []
+    for hour in range(24):
+        nombre_accident.append(heure.count(hour))
+    heure = [hour for hour in range(24)]
+
+    # graphique du nombre d'accidents en fonction de l'heure
+    return {
+        'data': [
+            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers')
+        ],
+        'layout': go.Layout(
+            title=f'Nombre d\'accidents par heure de la journée en {year}',
+            xaxis={'title': 'Heure'},
+            yaxis={'title': 'Nombre d\'accidents'},
         )
     }
 

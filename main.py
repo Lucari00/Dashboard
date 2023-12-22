@@ -333,13 +333,12 @@ def create_choropleth_map():
     legend_html = """
 <div style="position: fixed; 
             top: 10px; 
-            left: 50px; 
-            width: 120px; 
+            left: 50px;  
             border:2px solid grey; 
             z-index:9999; 
             font-size:14px;
             background-color: white;">
-    <div style="color: green;">🏫 Driving School</div>
+    <div style="color: green;">🏫 Auto école </div>
 </div>
 """
 

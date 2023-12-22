@@ -10,6 +10,7 @@ import asyncio
 from dash import Dash, dcc, html, Input, Output, State, callback
 import calendar
 import plotly.graph_objects as go
+import plotly.express as px
 
 app = Dash(__name__)
 
@@ -60,6 +61,8 @@ async def main():
     accident['date'] = pd.to_datetime(accident['date'])
 
     choropleth_map = create_choropleth_map()
+
+    histogram_gravity = create_histogram_gravity_by_hour()
 
     app.layout = html.Div(children=[
 
@@ -142,6 +145,11 @@ async def main():
             style={'display': 'flex', 'justify-content': 'center'}
         ),
 
+        dcc.Graph(
+            id='histogram-grave-hour',
+            figure=histogram_gravity
+        ),
+
         dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
 
         html.H2(id="title-map-choropleth", children='''Carte choroplèthe représentant le nombre d'accidents par commune.''',
@@ -149,6 +157,49 @@ async def main():
 
         html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
     ])
+
+def create_histogram_gravity_by_hour():
+    accident_heure = accident.copy()
+
+    accident_heure['heure'] = pd.to_datetime(accident['heure'], format='%H:%M:%S').dt.hour
+    accident_sorted = accident_heure.sort_values(by='heure')
+
+    accidents_mortels = accident_sorted[accident_sorted['type_acci'] == 'Mortel'].groupby('heure').size().reset_index(name='accidents')
+    accidents_mortels['type_acci'] = 'Mortel'
+
+    accidents_graves = accident_sorted[accident_sorted['type_acci'] == 'Grave'].groupby('heure').size().reset_index(name='accidents')
+    accidents_graves['type_acci'] = 'Grave'
+
+    accidents_legers = accident_sorted[accident_sorted['type_acci'] == 'Léger'].groupby('heure').size().reset_index(name='accidents')
+    accidents_legers['type_acci'] = 'Léger'
+
+    accident_sorted = pd.concat([accidents_mortels, accidents_graves, accidents_legers], ignore_index=True)
+
+    # Pivoter la table pour avoir les catégories comme colonnes
+    accident_sorted = accident_sorted.pivot(index='heure', columns='type_acci', values='accidents')
+
+    # Calculer les pourcentages
+    accident_sorted = accident_sorted.div(accident_sorted.sum(axis=1), axis=0) * 100
+
+    # Remplacer les valeurs NaN par 0
+    accident_sorted = accident_sorted.fillna(0)
+
+    # Réinitialiser l'index
+    accident_sorted.reset_index(inplace=True)
+
+    accident_sorted = pd.melt(accident_sorted, id_vars='heure', var_name='type_acci', value_name='proportion')
+
+    print(accident_sorted)
+
+    fig = px.bar(accident_sorted, 
+             x='heure', 
+             y='proportion', 
+             color='type_acci',
+             labels={'heure': 'Heure de l\'accident', 'proportion': 'Proportion d\'accidents', 'type_acci': 'Type d\'accident'},
+             title='Proportion d\'accidents de chaque catégorie pour chaque heure de la journée de 2006 à 2021'
+            )
+
+    return fig
 
 @callback(
         Output('year-slider', 'value'),

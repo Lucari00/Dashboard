@@ -5,6 +5,8 @@ tempCodeRunnerFile.py
 map.html
 test.py
 
+geckodriver.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

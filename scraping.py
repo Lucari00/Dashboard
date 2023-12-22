@@ -77,7 +77,7 @@ def get_scraping_data():
 
     get_driving_schools()
     driver.quit()
-    print("Scrapping terminé !")
+    print("Scraping terminé !")
 
 
 if __name__ == "__main__":

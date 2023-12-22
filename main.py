@@ -29,6 +29,8 @@ communes_hauts_de_seine = [
 couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
 couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for commune in communes_hauts_de_seine}
 
+# Couleur de fond
+bg_color = '#FCF5ED'
 
 async def main():
     global accident
@@ -43,7 +45,7 @@ async def main():
     except:
         print("Il manque au moins un fichier, exécution de la commande get_data.py")
         print("Pour récupérer les données, les fonctions fonctionnent sur différents threads, ce qui permet de gagner du temps.")
-        print("Dans de bonnes conditions, le temps d'exécution est d'environ 2 minutes...")
+        print("Dans de bonnes conditions, le temps d'exécution est d'environ 220 secondes sur les machines de l'ESIEE...")
         start = time.time()
         await get_data()
         print(f"Temps d'exécution: {time.time() - start} secondes")
@@ -55,28 +57,40 @@ async def main():
         radars = pd.read_csv("data/radars.csv")
         print("Création du dashboard...")
     
-    base_month = 4
     base_year = 2019
 
+    # Convertir la date, qui est en string, en datetime
     accident['date'] = pd.to_datetime(accident['date'])
 
+    # Crée une carte choroplèthe, non dynamique
     choropleth_map = create_choropleth_map()
 
+    # Crée un histogramme de la gravité des accidents par heure, non dynamique
     histogram_gravity = create_histogram_gravity_by_hour()
 
+    # Le layout du dashboard
     app.layout = html.Div(children=[
 
+        # Titre du dashboard
         html.H1(id="title-dash", children='Dashboard des accidents de la route dans les Hauts-de-Seine',
-                style={'textAlign': 'center', 'color': "#503D36"}),
+                style={'textAlign': 'center', 'color': "#503D36", 'font-size': '40px'}),
+    
+        # Titre de la carte des accidents en fonction du mois et de l'année
         html.H2(id="title-map", children='''Carte représentant les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
                 style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
+        
+        # Contenant de la carte des accidents en fonction du mois et de l'année
         html.Div(children=[html.Iframe(id='map', srcDoc=None, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
+        
+        # Texte qui affiche le nombre d'accidents en fonction du mois et de l'année
         html.Div(id='text-number-accident', children=["Nombre d'accidents: "], style={'textAlign': 'center', 'color': "#503D36"}),
 
+        # Contenant du menu pour changer la
         html.Div(id="container-change-date", 
             children=['''Choisissez une année et un mois pour afficher les accidents de la route.''',
                 html.Div(
                     children=[
+                        # Dropdown pour choisir le mois
                         dcc.Dropdown(
                             id='month-dropdown',
                             options=[
@@ -87,6 +101,7 @@ async def main():
                             clearable=False
                         ),
 
+                        # Dropdown pour choisir l'année
                         dcc.Dropdown(
                             id='year-dropdown',
                             options=[
@@ -103,25 +118,29 @@ async def main():
             style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%'}
         ),
 
+        # Grapique de l'histogramme des accidents par mois d'une année
         dcc.Graph(
             id='histogramme-accidents',
-            figure={}
+            figure={},
         ),
 
+        # Courbe du nombre d'accidents par heure d'une journée d'une année
         dcc.Graph(
             id='graphique-accidents-heures',
-            figure={}
+            figure={},
         ),
 
+        # Slider pour changer l'année des 2 graphiques précédents
         dcc.Slider(
             id='year-slider',
             min=accident['date'].dt.year.min(),
             max=accident['date'].dt.year.max(),
             value=base_year,
             marks={str(year): str(year) for year in accident['date'].dt.year.unique()},
-            step=None
+            step=None,
         ),
 
+        # Button pour arrêter le slider dynamique
         html.Div(
             children=[
                 html.Button(
@@ -145,20 +164,26 @@ async def main():
             style={'display': 'flex', 'justify-content': 'center'}
         ),
 
+        # Histogramme de la gravité des accidents par heure de tous les accidents
         dcc.Graph(
             id='histogram-grave-hour',
             figure=histogram_gravity
         ),
 
+        # Interval qui permet de rendre dynamique le slider et donc les graphiques
         dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
 
+        # Titre de la carte choroplèthe
         html.H2(id="title-map-choropleth", children='''Carte choroplèthe représentant le nombre d'accidents par commune.''',
                 style={'textAlign': 'center', 'color': "#503D36"}),
 
+        # Contenant de la carte choroplèthe
         html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
-    ])
+    
+    ], style={'width': '100%', 'padding': '0', 'padding-bottom': '15px', 'font-family': 'Helvetica', 'background-color': bg_color})
 
-def create_histogram_gravity_by_hour():
+# Fonction pour créer l'histogramme de la gravité des accidents par heure
+def create_histogram_gravity_by_hour() -> go.Figure:
     accident_heure = accident.copy()
 
     accident_heure['heure'] = pd.to_datetime(accident['heure'], format='%H:%M:%S').dt.hour
@@ -189,28 +214,36 @@ def create_histogram_gravity_by_hour():
 
     accident_sorted = pd.melt(accident_sorted, id_vars='heure', var_name='type_acci', value_name='proportion')
 
-    print(accident_sorted)
+    colors = {'Mortel': '#FF0000', 'Grave': '#FFA500', 'Léger': '#EEDD00'}
 
     fig = px.bar(accident_sorted, 
-             x='heure', 
-             y='proportion', 
-             color='type_acci',
-             labels={'heure': 'Heure de l\'accident', 'proportion': 'Proportion d\'accidents', 'type_acci': 'Type d\'accident'},
-             title='Proportion d\'accidents de chaque catégorie pour chaque heure de la journée de 2006 à 2021'
-            )
+            x='heure', 
+            y='proportion', 
+            color='type_acci',
+            color_discrete_map=colors,
+            labels={'heure': 'Heure de l\'accident', 'proportion': 'Proportion d\'accidents', 'type_acci': 'Type d\'accident'},
+            title='Proportion d\'accidents de chaque catégorie pour chaque heure de la journée de 2006 à 2021',
+        )
+    
+    fig.update_layout(
+        paper_bgcolor=bg_color,
+        plot_bgcolor=bg_color 
+    )
 
     return fig
 
+# Callback pour gérer l'interval et le slider dynamique
 @callback(
         Output('year-slider', 'value'),
         Input('interval', 'n_intervals'),
         State('year-slider', 'value')
     )
-def on_tick(n_intervals, year):
+def on_tick(_, year):
     years = sorted(accident['date'].dt.year.unique())
     year_index = years.index(year)
     return years[year_index + 1 if year_index + 1 < len(years) else 0]
 
+# Callback pour mettre à jour l'histogramme des accidents par mois
 @app.callback(
     Output(component_id='histogramme-accidents', component_property='figure'),
     Input(component_id='year-slider', component_property='value')
@@ -225,7 +258,7 @@ def update_histogramme(year):
                 y=accident_year.groupby(accident_year['date'].dt.month)['date'].count(),
                 name='Nombre d\'accidents',
                 marker=go.bar.Marker(
-                    color='rgb(55, 83, 109)'
+                    color='#EEDD00'
                 )
             )
         ],
@@ -233,9 +266,12 @@ def update_histogramme(year):
             title=f'Nombre d\'accidents par mois en {year}',
             xaxis={'title': 'Mois'},
             yaxis={'title': 'Nombre d\'accidents'},
+            plot_bgcolor=bg_color,
+            paper_bgcolor=bg_color  
         )
     }
 
+# Callback pour mettre à jour la courbe du nombre d'accidents par heure
 @app.callback(
     Output(component_id='graphique-accidents-heures', component_property='figure'),
     Input(component_id='year-slider', component_property='value')
@@ -254,15 +290,18 @@ def update_graphique(year):
     # graphique du nombre d'accidents en fonction de l'heure
     return {
         'data': [
-            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers')
+            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers', line=dict(color='#EEDD00'))
         ],
         'layout': go.Layout(
             title=f'Nombre d\'accidents par heure de la journée en {year}',
             xaxis={'title': 'Heure'},
             yaxis={'title': 'Nombre d\'accidents'},
+            plot_bgcolor=bg_color,
+            paper_bgcolor=bg_color  
         )
     }
 
+# Callback pour gérer le bouton pour stopper le slider dynamique
 @app.callback(
     Output('interval', 'disabled'),
     Output('play-button', 'children'),
@@ -275,6 +314,7 @@ def on_play_button_click(n_clicks):
     else:
         return False, '⏸️'
 
+# Callback pour mettre à jour la carte des accidents en fonction du mois et de l'année
 @app.callback(
     Output(component_id='map', component_property='srcDoc'),
     Output(component_id='text-number-accident', component_property='children'),
@@ -351,7 +391,8 @@ def create_map(data, year, month):
         
     return m._repr_html_()
 
-def create_choropleth_map():
+# Callback pour créer la carte choroplèthe
+def create_choropleth_map() -> str:
     center_lat = accident['geometry'].apply(lambda geom: geom.y).mean()
     center_lon = accident['geometry'].apply(lambda geom: geom.x).mean()
 

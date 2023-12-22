@@ -9,19 +9,22 @@ import geopandas
 from shapely.geometry import Point
 from os import makedirs
 
-def wait_for_element_loading(driver, class_name, timeout=120):
+# Fonction pour attendre le chargement d'un élément
+def wait_for_element_loading(driver: webdriver, class_name: str, timeout: int =120):
     WebDriverWait(driver, timeout).until(
         EC.presence_of_all_elements_located((By.CLASS_NAME, class_name))
     )    
 
-def create_firefox_browser():
+# Fonction pour créer un navigateur Firefox avec les options headless
+def create_firefox_browser() -> webdriver.Firefox:
     options = Options()
     # Pour cacher la fenêtre du navigateur
     options.add_argument("--headless")
     options.add_argument('--disable-blink-features=AutomationControlled')
     return webdriver.Firefox(options=options)
 
-def get_cities():
+# Fonction pour récupérer les liens des villes et les stocker dans une liste
+def get_cities() -> list:
     driver.get("https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/")
     department_class = "vv-department__link"
     cities = []
@@ -37,7 +40,8 @@ def get_cities():
         driver.quit()
     return cities
 
-def get_driving_schools():
+# Fonction pour récupérer les données des auto écoles et les stocker dans un fichier geojson
+def get_driving_schools() -> None:
     cities = get_cities()
 
     auto_ecoles = geopandas.GeoDataFrame(columns=["name", "position", "grade", "geometry"])
@@ -65,7 +69,8 @@ def get_driving_schools():
 
     auto_ecoles.to_file("data/driving_schools.geojson", driver="GeoJSON")
 
-def get_scraping_data():
+# Fonction pour récupérer les données des auto écoles
+def get_scraping_data() -> None:
     print("Récupération des données des auto écoles...")
     global driver
     try:

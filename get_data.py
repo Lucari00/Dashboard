@@ -9,7 +9,8 @@ from scraping import get_scraping_data
 # Pour éviter les erreurs de certificat sur le réseau de l'ESIEE
 ssl._create_default_https_context = ssl._create_unverified_context
 
-async def get_data():
+# Fonction pour récupérer les données des accidents, des radars, des communes et des auto écoles
+async def get_data() -> None:
     makedirs("data/", exist_ok=True)
 
     with ThreadPoolExecutor(max_workers=3) as executor:
@@ -33,6 +34,7 @@ async def get_data():
         else:
             print("Le fichier radars existe déjà !")
 
+# Fonction pour alléger le fichier big_accidents
 def lighten_data():
     print("Lecture du fichier big_accidents (Cela peut prendre quelques temps, fichiers lourds)...")
     accident = geopandas.read_file("data/big_accidents.geojson")
@@ -43,7 +45,8 @@ def lighten_data():
     accident.to_file("data/light_accidents.geojson", driver='GeoJSON')
     print("big_accidents allégé !")
 
-def get_data_from_internet(url, path, filename, lourd):
+# Fonction pour récupérer les données depuis internet
+def get_data_from_internet(url: str, path: str, filename: str, lourd: bool) -> None:
     if (lourd):
         print(f"Début du téléchargement de {filename} (Cela peut prendre quelques temps, fichiers lourds)...")
     else:

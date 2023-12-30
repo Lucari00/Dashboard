@@ -1,9 +1,6 @@
-
 import time
-import geojson, geopandas, pandas as pd
+import geopandas, pandas as pd
 import folium
-from folium.plugins import HeatMap
-from os import path
 import random
 from get_data import get_data
 import asyncio
@@ -45,9 +42,14 @@ async def main():
     except:
         print("Il manque au moins un fichier, exécution de la commande get_data.py")
         print("Pour récupérer les données, les fonctions fonctionnent sur différents threads, ce qui permet de gagner du temps.")
+        print("")
         print("Dans de bonnes conditions, le temps d'exécution est d'environ 220 secondes sur les machines de l'ESIEE...")
+        print("ATTENTION, MEME SI LE MESSAGE \"Scraping terminé !\" S'AFFICHE, CELA NE VEUT PAS DIRE QUE TOUT EST FINI !")
+        print("IL EST TRES PROBABLE QUE L'OUVERTURE DU FICHIER LOURD PRENNE DU TEMPS !")
+        print("")
         start = time.time()
         await get_data()
+        print("")
         print(f"Temps d'exécution: {time.time() - start} secondes")
         print("Lectures des données...")
 
@@ -80,14 +82,14 @@ async def main():
                 style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
         
         # Contenant de la carte des accidents en fonction du mois et de l'année
-        html.Div(children=[html.Iframe(id='map', srcDoc=None, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
+        html.Div(children=[html.Iframe(id='map', srcDoc=None, width='80%', height='500px', style={'border': f'2px solid #FFA500'})], style={'height': '500px', 'width': '100%', 'margin-bottom': '15px', 'justify-content': 'center', 'align-items': 'center', 'display': 'flex'}),
         
         # Texte qui affiche le nombre d'accidents en fonction du mois et de l'année
-        html.Div(id='text-number-accident', children=["Nombre d'accidents: "], style={'textAlign': 'center', 'color': "#503D36"}),
+        html.Div(id='text-number-accident', children=['''Nombre d'accidents pendant cette période : '''], style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
 
         # Contenant du menu pour changer la
         html.Div(id="container-change-date", 
-            children=['''Choisissez une année et un mois pour afficher les accidents de la route.''',
+            children=['''Choisissez une année et un mois pour afficher les accidents de la route sur la carte.''',
                 html.Div(
                     children=[
                         # Dropdown pour choisir le mois
@@ -115,7 +117,7 @@ async def main():
                     style={'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center'}
                 ),
             ], 
-            style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%'}
+            style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%', 'color': "#503D36", 'text-align': 'center'}
         ),
 
         # Grapique de l'histogramme des accidents par mois d'une année
@@ -178,7 +180,7 @@ async def main():
                 style={'textAlign': 'center', 'color': "#503D36"}),
 
         # Contenant de la carte choroplèthe
-        html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, width='100%', height='500', style={'overflow': 'hidden'})], style={'overflow': 'hidden'}),
+        html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, width='80%', height='500px', style={'border': f'2px solid #FFA500'})], style={'height': '500px', 'width': '100%', 'margin-bottom': '15px', 'justify-content': 'center', 'align-items': 'center', 'display': 'flex'}),
     
     ], style={'width': '100%', 'padding': '0', 'padding-bottom': '15px', 'font-family': 'Helvetica', 'background-color': bg_color})
 
@@ -331,7 +333,7 @@ def update_map(year, month):
     # récupérer le nom du mois en français
     month_name = calendar.month_name[month]
 
-    return m, f'''Nombre d'accidents: {len(accidentYearMonth)}''', f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.'''
+    return m, f'''Nombre d'accidents pendant cette période: {len(accidentYearMonth)}''', f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.'''
 
 def create_map(data, year, month):
     accident_year = data[data['date'].dt.year == year]
@@ -388,8 +390,13 @@ def create_map(data, year, month):
             parse_html=True,
             icon=icon
         ).add_to(m)
+
+    html_string = m.get_root().render().split('\n', 1)[1]
+
+    # Modify the HTML string to set the height
+    html_string = html_string.replace('<iframe', f'<iframe height="500px"')
         
-    return m._repr_html_()
+    return html_string
 
 # Callback pour créer la carte choroplèthe
 def create_choropleth_map() -> str:
@@ -436,7 +443,12 @@ def create_choropleth_map() -> str:
 
     m.get_root().html.add_child(folium.Element(legend_html))
 
-    return m._repr_html_()
+    html_string = m.get_root().render().split('\n', 1)[1]
+
+    # Modify the HTML string to set the height
+    html_string = html_string.replace('<iframe', f'<iframe height="500px" style="border: 0;"')
+
+    return html_string
 
 if __name__ == "__main__":
     asyncio.run(main())

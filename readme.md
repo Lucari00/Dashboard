@@ -41,7 +41,7 @@ Le dashboard visualise les accidents de la route dans les Hauts-de-Seine en avri
 
 - La majorité des accidents semble être concentrée dans certaines communes, identifiables par les couleurs sur la carte.
 - L'histogramme présente la distribution du nombre d'accidents par mois pour l'année sélectionnée, offrant une vue d'ensemble des tendances.
-- Nous sommes au courant d'une auto école étant présente en Egypte. En vérifiant sur le site où nous récupérons les données : [vroomvroom.fr](https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/asnieres-sur-seine), nous pouvons voir qu'il donne bien une auto école en Egypte. Nous avons décidé la laisser pour voir si dans le futur,  
+- Nous sommes au courant d'une auto école étant présente en Egypte. En vérifiant sur le site où nous récupérons les données : [vroomvroom.fr](https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/asnieres-sur-seine), nous pouvons voir qu'il donne bien une auto école en Egypte. Nous avons décidé la laisser pour voir si dans le futur, le site change sa localisation.
 
 # Developer Guide
 

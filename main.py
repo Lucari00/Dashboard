@@ -22,7 +22,7 @@ communes_hauts_de_seine = [
     "Sceaux", "Sèvres", "Suresnes", "Vanves", "Vaucresson", "Ville-d'Avray", "Villeneuve-la-Garenne"
 ]
 
-# Générez des couleurs aléatoires pour chaque commune
+# Génère des couleurs aléatoires pour chaque commune
 couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
 couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for commune in communes_hauts_de_seine}
 
@@ -61,7 +61,7 @@ async def main():
     
     base_year = 2019
 
-    # Convertir la date, qui est en string, en datetime
+    # Convertit la date, qui est en string, en datetime
     accident['date'] = pd.to_datetime(accident['date'])
 
     # Crée une carte choroplèthe, non dynamique
@@ -87,7 +87,7 @@ async def main():
         # Texte qui affiche le nombre d'accidents en fonction du mois et de l'année
         html.Div(id='text-number-accident', children=['''Nombre d'accidents pendant cette période : '''], style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
 
-        # Contenant du menu pour changer la
+        # Contenant du menu pour changer la date
         html.Div(id="container-change-date", 
             children=['''Choisissez une année et un mois pour afficher les accidents de la route sur la carte.''',
                 html.Div(
@@ -120,7 +120,7 @@ async def main():
             style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%', 'color': "#503D36", 'text-align': 'center'}
         ),
 
-        # Grapique de l'histogramme des accidents par mois d'une année
+        # Graphique de l'histogramme des accidents par mois d'une année
         dcc.Graph(
             id='histogramme-accidents',
             figure={},
@@ -142,7 +142,7 @@ async def main():
             step=None,
         ),
 
-        # Button pour arrêter le slider dynamique
+        # Bouton pour arrêter le slider dynamique
         html.Div(
             children=[
                 html.Button(
@@ -150,16 +150,16 @@ async def main():
                     children='▶️', 
                     n_clicks=0, 
                     style={
-                        'background-color': 'transparent',  # Button color
-                        'color': 'white',  # Text color
-                        'padding': '15px 32px',  # Top/bottom padding, left/right padding
-                        'text-align': 'center',  # Center the text
-                        'text-decoration': 'none',  # Remove underline
+                        'background-color': 'transparent',  # Couleur du bouton
+                        'color': 'white',  # Couleur du texte
+                        'padding': '15px 32px',
+                        'text-align': 'center',  # Centre le texte
+                        'text-decoration': 'none',  # Enlève le soulignement
                         'display': 'inline-block',  
-                        'font-size': '32px',  # Increase font size
-                        'margin': '4px 2px',  # Add some margin
-                        'border': 'none',  # Remove border
-                        'cursor': 'pointer',  # Add a hand cursor on hover
+                        'font-size': '32px',  # Augmente la taille du texte à 32px
+                        'margin': '4px 2px',  # Ajoute une marge
+                        'border': 'none',  # Aucune bordure
+                        'cursor': 'pointer',  # Change le curseur quand on passe dessus
                     }
                 )
             ],
@@ -172,7 +172,7 @@ async def main():
             figure=histogram_gravity
         ),
 
-        # Interval qui permet de rendre dynamique le slider et donc les graphiques
+        # Intervalle qui permet de rendre dynamique le slider et donc les graphiques
         dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
 
         # Titre de la carte choroplèthe
@@ -234,7 +234,7 @@ def create_histogram_gravity_by_hour() -> go.Figure:
 
     return fig
 
-# Callback pour gérer l'interval et le slider dynamique
+# Callback pour gérer l'intervalle et le slider dynamique
 @callback(
         Output('year-slider', 'value'),
         Input('interval', 'n_intervals'),
@@ -280,7 +280,7 @@ def update_histogramme(year):
 )
 def update_graphique(year):
     accident_year = accident[accident['date'].dt.year == year]
-    #trier par heure
+    # trier par heure
     accident_year = accident_year.sort_values(by=['heure'])
     # nombre d'accidents par heure
     heure = [int(hour[0:2]) for hour in accident_year['heure'].to_list()]
@@ -393,7 +393,7 @@ def create_map(data, year, month):
 
     html_string = m.get_root().render().split('\n', 1)[1]
 
-    # Modify the HTML string to set the height
+    # Modifie la hauteur de la carte
     html_string = html_string.replace('<iframe', f'<iframe height="500px"')
         
     return html_string
@@ -408,11 +408,11 @@ def create_choropleth_map() -> str:
     accident_count = accident.groupby('code_insee').size().reset_index(name='nbAccidents')
 
     folium.Choropleth(
-        geo_data=geo_data_92,                              # geographical data
+        geo_data=geo_data_92, # données géographiques
         name='choropleth',
-        data=accident_count,                                  # numerical data
-        columns=['code_insee', 'nbAccidents'],                     # numerical data key/value pair
-        key_on='feature.properties.code',       # geographical property used to establish correspondance with numerical data
+        data=accident_count, # nombre d'accidents par commune
+        columns=['code_insee', 'nbAccidents'],
+        key_on='feature.properties.code',
         fill_color='YlOrRd',  
         fill_opacity=0.7,
         line_opacity=0.2,
@@ -445,7 +445,7 @@ def create_choropleth_map() -> str:
 
     html_string = m.get_root().render().split('\n', 1)[1]
 
-    # Modify the HTML string to set the height
+    # Modifie la hauteur de la carte
     html_string = html_string.replace('<iframe', f'<iframe height="500px" style="border: 0;"')
 
     return html_string

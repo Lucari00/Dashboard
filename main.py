@@ -1,3 +1,6 @@
+"""
+    Programme principal qui crée le dashboard
+"""
 import time
 import random
 import asyncio
@@ -34,11 +37,6 @@ couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees))
 # Couleur de fond
 BG_COLOR = '#FCF5ED'
 
-accident = None
-geo_data_92 = None
-driving_schools = None
-radars = None
-
 async def main() -> None:
     """
         Fonction principale qui récupère les données et qui crée le dashboard
@@ -52,7 +50,7 @@ async def main() -> None:
         geo_data_92 = geopandas.read_file("data/communes-92-hauts-de-seine.geojson")
         driving_schools = geopandas.read_file("data/driving_schools.geojson")
         radars = pd.read_csv("data/radars.csv")
-    except:
+    except Exception:
         print("Il manque au moins un fichier, exécution de la commande get_data.py")
         print(
             "Pour récupérer les données, les fonctions fonctionnent sur différents "
@@ -400,7 +398,8 @@ def update_graphique(year: int) -> dict:
     # graphique du nombre d'accidents en fonction de l'heure
     return {
         'data': [
-            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers', line=dict({"color": '#EEDD00'}))
+            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers',
+                       line=dict({"color": '#EEDD00'}))
         ],
         'layout': go.Layout(
             title=f'Nombre d\'accidents par heure de la journée en {year}',
@@ -428,11 +427,11 @@ def on_play_button_click(n_clicks: int) -> tuple:
             bool: Si le slider est désactivé ou non
             str: Le texte du bouton
     """
-    if n_clicks is None: 
+    if n_clicks is None:
         return False, '⏸️'
     if n_clicks % 2 == 1:
         return True, '▶️'
-    
+
     return False, '⏸️'
 
 # Callback pour mettre à jour la carte des accidents en fonction du mois et de l'année
@@ -461,7 +460,7 @@ def update_map(year: int, month: int) -> tuple:
     accident_year = accident[accident['date'].dt.year == year]
     accident_year_month = accident_year[accident_year['date'].dt.month == month]
 
-    # récupérer le nom du mois en français
+    # récupérer le nom du mois
     month_name = calendar.month_name[month]
 
     return (m,
@@ -486,9 +485,9 @@ def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
     accident_year = data[data['date'].dt.year == year]
     accident_year_month = accident_year[accident_year['date'].dt.month == month]
 
-    center_lat = accident_year_month['geometry'].apply(lambda geom: geom.y).mean()
-    center_lon = accident_year_month['geometry'].apply(lambda geom: geom.x).mean()
-    m = folium.Map(location=[center_lat,center_lon], zoom_start=13)
+    m = folium.Map(location=[accident_year_month['geometry'].apply(lambda geom: geom.y).mean()
+                             ,accident_year_month['geometry'].apply(lambda geom: geom.x).mean()],
+                               zoom_start=13)
 
     for _, row in accident_year_month.iterrows():
         popup_content = f"""<div style='white-space: pre-wrap; width: 200px;'>
@@ -584,7 +583,7 @@ def create_choropleth_map() -> str:
     choropleth.add_to(m)
 
     # ajout des auto-écoles
-    for index, row in driving_schools.iterrows():
+    for _, row in driving_schools.iterrows():
         popup_content = f"""
 <div style='white-space: pre-wrap; width: 200px;'>
 <b>🏫 Nom</b> : {row['name']}<br>

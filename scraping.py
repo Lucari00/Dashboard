@@ -126,6 +126,7 @@ def get_scraping_data() -> None:
     get_driving_schools(driver)
     driver.quit()
     print("Scraping terminé !")
+    print("Attention, La lecture du fichier lourd n'est peut-être pas finie...")
 
 if __name__ == "__main__":
     get_scraping_data()

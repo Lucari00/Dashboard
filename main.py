@@ -1,13 +1,13 @@
 import time
+import random
+import asyncio
+import calendar
 import geopandas, pandas as pd
 import folium
-import random
-from get_data import get_data
-import asyncio
 from dash import Dash, dcc, html, Input, Output, State, callback
-import calendar
 import plotly.graph_objects as go
 import plotly.express as px
+from get_data import get_data
 
 app = Dash(__name__)
 

@@ -47,8 +47,8 @@ En mars, avril, mai, novembre 2020 et en février 2021, les baisses du nombre d'
 
 - Comme la répartition est la même dans la journée en fonction des années, nous avons fait l'histogramme suivant pour tout l'échantillon d'accidents. Grâce à celui-ci, nous vérifions les statistiques de la sécurité routière qui sont que 1/4 des accidents mortels se passent entre 2h et 6h. Il y a effectivement une significative augmentation de la gravité des accidents et de la mortalité pendant la nuit.
 
-- Enfin, sur la dernière carte, les villes où se passent le plus d'accidents (plus de 2600 sur la période) sont Nanterre, Boulogne-Billancourt et Gennevilliers. Nanterre et Boulogne sont les deux villes les plus peuplées du 92, ce qui explique ce nombre. Gennevilliers, bien que moins peuplée, a des routes dangereuses puis l'A86 et le Viaduc sont des axes majeurs du Nord-Ouest parisien. Pour finir, le nombre d'auto écoles dans une ville ne semble pas être corrélé avec le nombre d'accidents dans celle-ci
-Nous sommes au courant d'une auto école étant présente en Egypte. En vérifiant sur le site où nous récupérons les données : [vroomvroom.fr](https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/asnieres-sur-seine), nous pouvons voir qu'il donne bien une auto école en Egypte. Nous avons décidé la laisser pour voir si dans le futur, le site change sa localisation.
+- Enfin, sur la dernière carte, les villes où se passent le plus d'accidents (plus de 2600 sur la période) sont Nanterre, Boulogne-Billancourt et Gennevilliers. Nanterre et Boulogne sont les deux villes les plus peuplées du 92, ce qui explique ce nombre. Gennevilliers, bien que moins peuplée, a des routes dangereuses puis l'A86 et le Viaduc sont des axes majeurs du Nord-Ouest parisien. Pour finir, le nombre d'auto écoles dans une ville ne semble pas être corrélé avec le nombre d'accidents dans celle-ci.
+Pendant tout le temps de développement du dashboard, une auto école était présente en Egypte. En vérifiant sur le site où nous récupérons les données : [vroomvroom.fr](https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/asnieres-sur-seine), nous pouvions voir qu'il donnait bien une auto école en Egypte. Nous avions décidé de la laisser pour voir si dans le futur, le site aurait changé sa localisation, ce qui est effictement le cas.
 
 # Developer Guide
 
@@ -56,15 +56,29 @@ Nous sommes au courant d'une auto école étant présente en Egypte. En vérifia
 
 Le code du dashboard est structuré comme suit :
 
-- `main.py` : Fichier principal contenant la configuration du tableau de bord Dash, les callbacks et les fonctions de création de la carte et de l'histogramme.
+- `main.py` : Fichier principal contenant la configuration du dashboard, les callbacks et les fonctions de création des cartes, des histogrammes et du graphique.
 - `get_data.py` : Fichier contenant les fonctions permettant de télécharger et de traiter les données sur les accidents.
+- `scraping.py` : Fichier contenant l'extraction de données sur un site internet, ici [vroomvroom.fr](https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/).
+- `requirements.txt`: Fichier contenant toutes les bibliothèques que le dashboard a besoin pour être exécuter.
+- `assets/styles.css`: Fichier contenant le style du site, particulièrement le body du html pour faciliter la configuration globale du site.
 
 ## Modification ou Extension du Code
 
-- **Personnalisation des couleurs :** Vous pouvez ajuster les couleurs utilisées pour représenter chaque commune en modifiant la variable `couleurs_acceptees` dans le fichier `main.py`.
+- **Personnalisation des couleurs :** Vous pouvez ajuster les couleurs utilisées possible pour représenter chaque commune en modifiant la variable `couleurs_acceptees` dans le fichier `main.py`. Vous avez la possibilité d'ajuster les couleurs utilisées pour représenter chaque commune en modifiant la variable couleurs_acceptees dans le fichier main.py. Ces couleurs seront attribuées de manière aléatoire à chaque commune à chaque exécution du programme.
+```
+couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
+```
 
-- **Ajout de nouvelles fonctionnalités :** Pour ajouter de nouvelles fonctionnalités au tableau de bord, vous pouvez créer de nouveaux éléments graphiques dans le fichier `main.py` en utilisant la bibliothèque Dash et Plotly.
+- **Ajout de nouvelles fonctionnalités :** Pour ajouter de nouvelles fonctionnalités au dashboard, vous pouvez ajouter dans le `main.py` à la variable `app.layout` tous les éléments html que vous souhaitez. Ensuite, vous pouvez aussi rajouter vos propres graphiques ou cartes. Pour simplifier la structure du code, nous vous recommandons de créer une fonction qui va renvoyer l'élément à afficher. Pour ajouter des éléments dynamiques, créer un `@app.callback`, avec les entrées et sorties qu'il vous faut.
 
-- **Extension des fonctionnalités de récupération de données :** Si vous avez besoin de récupérer des données supplémentaires ou de les traiter différemment, vous pouvez modifier les fonctions du fichier `get_data.py`.
+- **Extension des fonctionnalités de récupération de données :** Si vous avez besoin de récupérer des données supplémentaires ou de les traiter différemment, vous pouvez modifier les fonctions du fichier `get_data.py`. Il suffit de rajouter les tests dans le `with ThreadPoolExecutor(max_workers=3) as executor:` avec des lignes comme suit : 
+```
+if not path.exists("data/votre-nom-de-fichier.extension"):
+   executor.submit(fonction, parametre1, parametre2,)
+else:
+   print("Le fichier votre-nom-de-fichier existe déjà !")
+```
+où `fonction` peut être `def get_data_from_internet(url: str, path: str, filename: str, lourd: bool) -> None:` qui va télécharger depuis l'`url` donné et le sauvegarder au `path` et au `filename`(avec extension) donné. Le paramètre `lourd` sera forcément à `false`.
+Ou `fonction` peut aussi être une fonction que vous pouvez créer et faire du scraping depuis le fichier `scraping.py` où il y a toutes les fonctions dont vous avez besoin pour scraper le site que vous voulez.
 
 N'hésitez pas à explorer et à expérimenter pour personnaliser le dashboard en fonction de vos besoins spécifiques.

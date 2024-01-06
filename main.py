@@ -409,7 +409,7 @@ def create_choropleth_map() -> str:
 
     accident_count = accident.groupby('code_insee').size().reset_index(name='nbAccidents')
 
-    folium.Choropleth(
+    choropleth = folium.Choropleth(
         geo_data=geo_data_92, # données géographiques
         name='choropleth',
         data=accident_count, # nombre d'accidents par commune
@@ -419,7 +419,13 @@ def create_choropleth_map() -> str:
         fill_opacity=0.7,
         line_opacity=0.2,
         legend_name='Nombre d\'accidents'
-    ).add_to(m)
+    )
+
+    choropleth.geojson.add_child(
+        folium.features.GeoJsonTooltip(['nom'], labels=False)
+    )
+
+    choropleth.add_to(m)
 
     # ajout des auto-écoles
     for index, row in driving_schools.iterrows():

@@ -2,7 +2,7 @@
 
 ## Déploiement et Utilisation du Dashboard
 
-Pour déployer et utiliser le dashboard sur une autre machine, suivez les étapes ci-dessous :
+Pour déployer et utiliser le dashboard, suivez les étapes ci-dessous :
 
 ### Prérequis
 
@@ -18,7 +18,7 @@ Assurez-vous d'avoir les éléments suivants installés sur votre machine :
 2. Naviguez vers le répertoire du projet via le terminal ou l'invite de commande.
 
 3. Installez les dépendances en exécutant la commande suivante :
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
@@ -27,7 +27,7 @@ Assurez-vous d'avoir les éléments suivants installés sur votre machine :
 1. Assurez-vous d'être toujours dans le répertoire du projet.
 
 2. Exécutez le fichier `main.py` à l'aide de la commande suivante :
-   ```
+   ```bash
    python main.py
    ```
 
@@ -117,7 +117,7 @@ flowchart TD
 
 - **Extension des fonctionnalités de récupération de données :** Si vous avez besoin de récupérer des données supplémentaires ou de les traiter différemment, vous pouvez modifier les fonctions du fichier `get_data.py`. Il suffit de rajouter les tests dans le
 `with ThreadPoolExecutor(max_workers=3) as executor:` avec des lignes comme suit : 
-```
+```python
 if not path.exists("data/votre-nom-de-fichier.extension"):
    executor.submit(fonction, parametre1, parametre2,)
 else:
@@ -128,3 +128,10 @@ else:
 
 Vous pouvez maintenant étendre le dashboard comme bon vous semble !
 
+# Copyright
+Nous déclarons sur l’honneur que le code fourni a été produit par nous même, à l’exception de la ligne ci dessous :
+```python
+  ssl._create_default_https_context = ssl._create_unverified_context
+```
+
+Source : https://stackoverflow.com/questions/27835619/urllib-and-ssl-certificate-verify-failed-error

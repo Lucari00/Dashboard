@@ -350,13 +350,15 @@ def create_map(data, year, month):
 <b>🕐 Heure</b> : {row['heure']}<br>
 <b>🚗 Accident</b> : {row['type_acci']}<br>
 """
-        if not row['type_colli'].isdigit():
-            popup_content += f"<b>🚨 Collision</b> : {row['type_colli']}<br>"
+        if row['type_colli'] is not None:
+            if not row['type_colli'].isdigit() and row['type_colli'] != '-1':
+                popup_content += f"<b>🚨 Collision</b> : {row['type_colli']}<br>"
 
-        if "Nuit" in row['luminosite']:
-            emoji_lum = "🌑"
-        else:
-            emoji_lum = "☀️"
+        if row['luminosite'] is not None:
+            if "Nuit" in row['luminosite']:
+                emoji_lum = "🌑"
+            else:
+                emoji_lum = "☀️"
 
         popup_content += f"<b>{emoji_lum} Luminosité</b> : {row['luminosite']}"
         color = couleurs_par_commune.get(row['commune'], 'blue')
@@ -412,7 +414,7 @@ def create_choropleth_map() -> str:
         name='choropleth',
         data=accident_count, # nombre d'accidents par commune
         columns=['code_insee', 'nbAccidents'],
-        key_on='feature.properties.code',
+        key_on='feature.properties.insee_com',
         fill_color='YlOrRd',  
         fill_opacity=0.7,
         line_opacity=0.2,

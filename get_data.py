@@ -20,7 +20,7 @@ async def get_data() -> None:
             print("Le fichier big_accidents existe déjà !")
 
         if not path.exists("data/communes-92-hauts-de-seine.geojson"):
-            executor.submit(get_data_from_internet, "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements/92-hauts-de-seine/communes-92-hauts-de-seine.geojson", "data/communes-92-hauts-de-seine.geojson", "communes-92-hauts-de-seine", False)
+            executor.submit(get_data_from_internet, "https://opendata.hauts-de-seine.fr/api/explore/v2.1/catalog/datasets/communes/exports/geojson?lang=fr&timezone=Europe/Berlin", "data/communes-92-hauts-de-seine.geojson", "communes-92-hauts-de-seine", False)
         else:
             print("Le fichier communes-92-hauts-de-seine existe déjà !")
 

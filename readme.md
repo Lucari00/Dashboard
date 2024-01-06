@@ -52,7 +52,56 @@ Pendant tout le temps de développement du dashboard, une auto école était pr�
 
 ## Architecture du Code
 
-Le code du dashboard est structuré comme suit :
+Le code du dashboard est structuré de la façon suivante:
+
+```mermaid
+flowchart TD
+    subgraph get_data.py
+        a1(get_data.py)
+        a2(get_scraping_data)
+        a3(get_data_from_internet)
+        a4(lighten_data)
+        a5(all data retrieved)
+    end
+
+    subgraph scraping.py
+        b2(create_firefox_browser)
+        b3(get_cities)
+        b4(wait_for_element_loading)
+        b5(get_driving_schools)
+        b6(charge internet page)
+    end
+
+    subgraph main.py
+        c1(main.py)
+        c2(check if data is present)
+        c3(create_dashboard)
+        c4(callback)
+        c5(Site uptaded)
+    end
+
+    a1 --> a3
+    a1 --> a2
+    a3 -->|If needed| a4
+    a3 --> a5
+    a4 --> a5
+    a2 --> b2
+    b2 --> b3
+    b3 --> b6
+    b6 --> b4
+    b4 --> b5
+    b5 --> b6
+    b6 -->|If no more page to analyse| a5
+    c2{Is Data present?} -->|Yes| c3
+    c2 -->|No| a1
+    a5{Is all data retrieved?} -->|Yes| c3
+    c1 --> c2
+    c3 --> c4
+    c4{Wait for callback} -->|Callback| c5
+    c5 --> c4
+```
+
+### Description de chaque fichier important
 
 - `main.py` : Fichier principal contenant la configuration du dashboard, les callbacks et les fonctions de création des cartes, des histogrammes et du graphique.
 - `get_data.py` : Fichier contenant les fonctions permettant de télécharger et de traiter les données sur les accidents.
@@ -78,3 +127,4 @@ else:
 * `fonction` peut aussi être une fonction que vous pouvez créer et faire du scraping depuis le fichier `scraping.py` où il y a toutes les fonctions dont vous avez besoin pour scraper le site que vous voulez.
 
 Vous pouvez maintenant étendre le dashboard comme bon vous semble !
+

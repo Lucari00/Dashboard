@@ -99,8 +99,8 @@ def get_data_from_internet(url: str, filepath: str, filename: str, lourd: bool) 
     """
     if lourd:
         print(
-            (f"Début du téléchargement de {filename} "
-            "Cela peut prendre quelques temps, fichiers lourds...")
+            f"Début du téléchargement de {filename} "
+            "Cela peut prendre quelques temps, fichiers lourds..."
         )
     else:
         print(f"Début du téléchargement de {filename} (fichier léger)...")

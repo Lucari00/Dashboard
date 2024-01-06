@@ -61,7 +61,7 @@ async def main() -> None:
         driving_schools = geopandas.read_file("data/driving_schools.geojson")
         radars = pd.read_csv("data/radars.csv")
         print("Création du dashboard...")
-    
+
     base_year = 2019
 
     # Convertit la date, qui est en string, en datetime
@@ -77,18 +77,26 @@ async def main() -> None:
     app.layout = html.Div(children=[
 
         # Titre du dashboard
-        html.H1(id="title-dash", children='Dashboard des accidents de la route dans les Hauts-de-Seine',
+        html.H1(id="title-dash",
+                children='Dashboard des accidents de la route dans les Hauts-de-Seine',
                 style={'textAlign': 'center', 'color': "#503D36", 'font-size': '40px'}),
-    
+
         # Titre de la carte des accidents en fonction du mois et de l'année
-        html.H2(id="title-map", children='''Carte représentant les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
+        html.H2(id="title-map", 
+                children='''Carte représentant les accidents de la route dans les Hauts-de-Seine en avril 2019.''',
                 style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
         
         # Contenant de la carte des accidents en fonction du mois et de l'année
-        html.Div(children=[html.Iframe(id='map', srcDoc=None, width='80%', height='500px', style={'border': f'2px solid #FFA500'})], style={'height': '500px', 'width': '100%', 'margin-bottom': '15px', 'justify-content': 'center', 'align-items': 'center', 'display': 'flex'}),
-        
+        html.Div(children=[html.Iframe(id='map', srcDoc=None, width='80%', height='500px',
+                                       style={'border': f'2px solid #FFA500'})],
+                            style={'height': '500px', 'width': '100%',
+                                   'margin-bottom': '15px',
+                                   'justify-content': 'center', 'align-items':
+                                   'center', 'display': 'flex'}),
+
         # Texte qui affiche le nombre d'accidents en fonction du mois et de l'année
-        html.Div(id='text-number-accident', children=['''Nombre d'accidents pendant cette période : '''], style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
+        html.Div(id='text-number-accident', children=['''Nombre d'accidents pendant cette période : '''], 
+                 style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
 
         # Contenant du menu pour changer la date
         html.Div(id="container-change-date", 
@@ -99,7 +107,9 @@ async def main() -> None:
                         dcc.Dropdown(
                             id='month-dropdown',
                             options=[
-                                {'label': month, 'value': pd.to_datetime(month, format='%B').month} for month in sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month)
+                                {'label': month, 'value': pd.to_datetime(month, format='%B').month} 
+                                for month in sorted(accident['date'].dt.month_name().unique(), 
+                                                    key=lambda x: pd.to_datetime(x, format='%B').month)
                             ],
                             value=4,  # Valeur par défaut
                             style={'width': '150px'},
@@ -110,17 +120,20 @@ async def main() -> None:
                         dcc.Dropdown(
                             id='year-dropdown',
                             options=[
-                                {'label': str(year), 'value': year} for year in sorted(accident['date'].dt.year.unique())
+                                {'label': str(year), 'value': year} for year 
+                                    in sorted(accident['date'].dt.year.unique())
                             ],
                             value=2019,  # Valeur par défaut
                             style={'width': '150px'},
                             clearable=False
                         ),
-                    ], 
+                    ],
                     style={'display': 'flex', 'flex-direction': 'row', 'justify-content': 'center'}
                 ),
-            ], 
-            style={'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', 'width': '100%', 'color': "#503D36", 'text-align': 'center'}
+            ],
+            style={'display': 'flex', 'flex-direction': 'column', 
+                   'align-items': 'center', 'justify-content': 'center', 
+                   'width': '100%', 'color': "#503D36", 'text-align': 'center'}
         ),
 
         # Graphique de l'histogramme des accidents par mois d'une année
@@ -149,9 +162,9 @@ async def main() -> None:
         html.Div(
             children=[
                 html.Button(
-                    id='play-button', 
-                    children='▶️', 
-                    n_clicks=0, 
+                    id='play-button',
+                    children='▶️',
+                    n_clicks=0,
                     style={
                         'background-color': 'transparent',  # Couleur du bouton
                         'color': 'white',  # Couleur du texte
@@ -179,13 +192,21 @@ async def main() -> None:
         dcc.Interval(id="interval", interval=1*3000, n_intervals=0, disabled=False),
 
         # Titre de la carte choroplèthe
-        html.H2(id="title-map-choropleth", children='''Carte choroplèthe représentant le nombre d'accidents par commune.''',
+        html.H2(id="title-map-choropleth", 
+                children='''Carte choroplèthe représentant le nombre d'accidents par commune.''',
                 style={'textAlign': 'center', 'color': "#503D36"}),
 
         # Contenant de la carte choroplèthe
-        html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, width='80%', height='500px', style={'border': f'2px solid #FFA500'})], style={'height': '500px', 'width': '100%', 'margin-bottom': '15px', 'justify-content': 'center', 'align-items': 'center', 'display': 'flex'}),
-    
-    ], style={'width': '100%', 'padding': '0', 'padding-bottom': '15px', 'font-family': 'Helvetica', 'background-color': bg_color})
+        html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map, 
+                                       width='80%', height='500px', 
+                                       style={'border': f'2px solid #FFA500'})], 
+                        style={'height': '500px', 'width': '100%', 
+                               'margin-bottom': '15px', 
+                               'justify-content': 'center', 'align-items': 
+                               'center', 'display': 'flex'}),
+
+    ], style={'width': '100%', 'padding': '0', 'padding-bottom': 
+              '15px', 'font-family': 'Helvetica', 'background-color': bg_color})
 
 # Fonction pour créer l'histogramme de la gravité des accidents par heure
 def create_histogram_gravity_by_hour() -> go.Figure:
@@ -201,15 +222,19 @@ def create_histogram_gravity_by_hour() -> go.Figure:
     accident_sorted = accident_heure.sort_values(by='heure')
 
     accidents_mortels = accident_sorted[accident_sorted['type_acci'] == 'Mortel'].groupby('heure').size().reset_index(name='accidents')
+
     accidents_mortels['type_acci'] = 'Mortel'
 
     accidents_graves = accident_sorted[accident_sorted['type_acci'] == 'Grave'].groupby('heure').size().reset_index(name='accidents')
+
     accidents_graves['type_acci'] = 'Grave'
 
     accidents_legers = accident_sorted[accident_sorted['type_acci'] == 'Léger'].groupby('heure').size().reset_index(name='accidents')
+
     accidents_legers['type_acci'] = 'Léger'
 
-    accident_sorted = pd.concat([accidents_mortels, accidents_graves, accidents_legers], ignore_index=True)
+    accident_sorted = pd.concat([accidents_mortels, 
+                                 accidents_graves, accidents_legers], ignore_index=True)
 
     # Pivoter la table pour avoir les catégories comme colonnes
     accident_sorted = accident_sorted.pivot(index='heure', columns='type_acci', values='accidents')
@@ -223,22 +248,23 @@ def create_histogram_gravity_by_hour() -> go.Figure:
     # Réinitialiser l'index
     accident_sorted.reset_index(inplace=True)
 
-    accident_sorted = pd.melt(accident_sorted, id_vars='heure', var_name='type_acci', value_name='proportion')
+    accident_sorted = pd.melt(accident_sorted, id_vars='heure', 
+                              var_name='type_acci', value_name='proportion')
 
     colors = {'Mortel': '#FF0000', 'Grave': '#FFA500', 'Léger': '#EEDD00'}
 
-    fig = px.bar(accident_sorted, 
-            x='heure', 
-            y='proportion', 
+    fig = px.bar(accident_sorted,
+            x='heure',
+            y='proportion',
             color='type_acci',
             color_discrete_map=colors,
             labels={'heure': 'Heure de l\'accident', 'proportion': 'Proportion d\'accidents', 'type_acci': 'Type d\'accident'},
             title='Proportion d\'accidents de chaque catégorie pour chaque heure de la journée de 2006 à 2021',
         )
-    
+
     fig.update_layout(
         paper_bgcolor=bg_color,
-        plot_bgcolor=bg_color 
+        plot_bgcolor=bg_color
     )
 
     return fig
@@ -284,7 +310,8 @@ def update_histogramme(year: int) -> dict:
     return {
         'data': [
             go.Bar(
-                x=sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month),
+                x=sorted(accident['date'].dt.month_name().unique(), 
+                         key=lambda x: pd.to_datetime(x, format='%B').month),
                 y=accident_year.groupby(accident_year['date'].dt.month)['date'].count(),
                 name='Nombre d\'accidents',
                 marker=go.bar.Marker(
@@ -297,7 +324,7 @@ def update_histogramme(year: int) -> dict:
             xaxis={'title': 'Mois'},
             yaxis={'title': 'Nombre d\'accidents'},
             plot_bgcolor=bg_color,
-            paper_bgcolor=bg_color  
+            paper_bgcolor=bg_color
         )
     }
 
@@ -336,7 +363,7 @@ def update_graphique(year: int) -> dict:
             xaxis={'title': 'Heure'},
             yaxis={'title': 'Nombre d\'accidents'},
             plot_bgcolor=bg_color,
-            paper_bgcolor=bg_color  
+            paper_bgcolor=bg_color
         )
     }
 
@@ -392,8 +419,8 @@ def update_map(year: int, month: int) -> tuple:
     # récupérer le nom du mois en français
     month_name = calendar.month_name[month]
 
-    return (m, 
-            f'''Nombre d'accidents pendant cette période: {len(accidentYearMonth)}''', 
+    return (m,
+            f'''Nombre d'accidents pendant cette période: {len(accidentYearMonth)}''',
             f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.''')
 
 def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
@@ -436,28 +463,29 @@ def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
 
         popup_content += f"<b>{emoji_lum} Luminosité</b> : {row['luminosite']}"
         color = couleurs_par_commune.get(row['commune'], 'blue')
-        folium.Marker(location=[row['geometry'].y, row['geometry'].x], 
+        folium.Marker(location=[row['geometry'].y, row['geometry'].x],
                       popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
 
     # Ajout des radars que du 92
     radars_92 = radars[radars['departement'] == '92']
     for index, row in radars_92.iterrows():
-        popup_content = f"""
+        popup_content = """
 <div style='white-space: pre-wrap; width: 200px;'>
 """
 
         icon_name = 'assets/radar_fixe.png'
 
-        if (row['type'] != ''):
+        if row['type'] != '':
             popup_content += f"<b>🚨 {row['type']}</b><br>"
-            if (row['type'] == 'Radar feu rouge'):
+            if row['type'] == 'Radar feu rouge':
                 icon_name = 'assets/radar_feu_rouge.png'
-                
 
         if not pd.isna(row['route']) and isinstance(row['route'], str):
             popup_content += f"<b>🛣️ Route</b> : {row['route']}<br>"
 
-        if not pd.isna(row['vitesse_vehicules_legers_kmh']) and isinstance(row['vitesse_vehicules_legers_kmh'], str):
+        if (not pd.isna(row['vitesse_vehicules_legers_kmh']) 
+            and isinstance(row['vitesse_vehicules_legers_kmh'], str)):
+
             popup_content += f"<b>💨 Vitesse max</b> : {row['vitesse_vehicules_legers_kmh']} km/h<br>"
 
         icon = folium.CustomIcon(icon_image=icon_name, icon_size=(64, 64))
@@ -471,8 +499,8 @@ def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
     html_string = m.get_root().render().split('\n', 1)[1]
 
     # Modifie la hauteur de la carte
-    html_string = html_string.replace('<iframe', f'<iframe height="500px"')
-        
+    html_string = html_string.replace('<iframe', '<iframe height="500px"')
+
     return html_string
 
 # Callback pour créer la carte choroplèthe
@@ -496,7 +524,7 @@ def create_choropleth_map() -> str:
         data=accident_count, # nombre d'accidents par commune
         columns=['code_insee', 'nbAccidents'],
         key_on='feature.properties.insee_com',
-        fill_color='YlOrRd',  
+        fill_color='YlOrRd',
         fill_opacity=0.7,
         line_opacity=0.2,
         legend_name='Nombre d\'accidents'
@@ -515,8 +543,9 @@ def create_choropleth_map() -> str:
 <b>🏫 Nom</b> : {row['name']}<br>
 <b>⭐ Note</b> : {row['grade']}/5
 """
-        
-        folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=folium.Popup(popup_content, max_width='100%'), 
+
+        folium.Marker(location=[row['geometry'].y, row['geometry'].x], 
+                      popup=folium.Popup(popup_content, max_width='100%'), 
                       parse_html=True, icon=folium.Icon(color='green')).add_to(m)
 
     legend_html = """
@@ -536,7 +565,7 @@ def create_choropleth_map() -> str:
     html_string = m.get_root().render().split('\n', 1)[1]
 
     # Modifie la hauteur de la carte
-    html_string = html_string.replace('<iframe', f'<iframe height="500px" style="border: 0;"')
+    html_string = html_string.replace('<iframe', '<iframe height="500px" style="border: 0;"')
 
     return html_string
 

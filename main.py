@@ -99,7 +99,7 @@ async def main():
                                 {'label': month, 'value': pd.to_datetime(month, format='%B').month} for month in sorted(accident['date'].dt.month_name().unique(), key=lambda x: pd.to_datetime(x, format='%B').month)
                             ],
                             value=4,  # Valeur par défaut
-                            style={'width': '100px'},
+                            style={'width': '150px'},
                             clearable=False
                         ),
 
@@ -110,7 +110,7 @@ async def main():
                                 {'label': str(year), 'value': year} for year in sorted(accident['date'].dt.year.unique())
                             ],
                             value=2019,  # Valeur par défaut
-                            style={'width': '100px'},
+                            style={'width': '150px'},
                             clearable=False
                         ),
                     ], 
@@ -460,4 +460,4 @@ def create_choropleth_map() -> str:
 
 if __name__ == "__main__":
     asyncio.run(main())
-    app.run_server(debug=True)
+    app.run_server(debug=False)

@@ -57,12 +57,12 @@ Le code du dashboard est structuré comme suit :
 - `main.py` : Fichier principal contenant la configuration du dashboard, les callbacks et les fonctions de création des cartes, des histogrammes et du graphique.
 - `get_data.py` : Fichier contenant les fonctions permettant de télécharger et de traiter les données sur les accidents.
 - `scraping.py` : Fichier contenant l'extraction de données sur un site internet, ici [vroomvroom.fr](https://www.vroomvroom.fr/auto-ecoles/hauts-de-seine/).
-- `requirements.txt`: Fichier contenant toutes les bibliothèques que le dashboard a besoin pour être exécuter.
+- `requirements.txt`: Fichier contenant toutes les bibliothèques dont le dashboard a besoin pour être exécuté.
 - `assets/styles.css`: Fichier contenant le style du site, particulièrement le body du html pour faciliter la configuration globale du site.
 
 ## Modification ou Extension du Code
 
-- **Personnalisation des couleurs :** Vous pouvez ajuster les couleurs utilisées possible pour représenter chaque commune en modifiant la variable `couleurs_acceptees` dans le fichier `main.py`. Vous avez la possibilité d'ajuster les couleurs utilisées pour représenter chaque commune en modifiant la variable couleurs_acceptees dans le fichier main.py. Ces couleurs seront attribuées de manière aléatoire à chaque commune au début de chaque exécution du programme.
+- **Personnalisation des couleurs :** Vous pouvez ajuster les couleurs utilisées possibles pour représenter chaque commune en modifiant la variable `couleurs_acceptees` dans le fichier `main.py`. Vous avez la possibilité d'ajuster les couleurs utilisées pour représenter chaque commune en modifiant la variable couleurs_acceptees dans le fichier main.py. Ces couleurs seront attribuées de manière aléatoire à chaque commune au début de chaque exécution du programme.
 
 - **Ajout de nouvelles fonctionnalités :** Pour ajouter de nouvelles fonctionnalités au dashboard, vous pouvez ajouter dans le `main.py` à la variable `app.layout` tous les éléments html que vous souhaitez. Ensuite, vous pouvez aussi rajouter vos propres graphiques ou cartes. Pour simplifier la structure du code, nous vous recommandons de créer une fonction qui va renvoyer l'élément à afficher. Pour ajouter des éléments dynamiques, créer un `@app.callback`, avec les entrées et sorties qu'il vous faut.
 
@@ -74,7 +74,7 @@ if not path.exists("data/votre-nom-de-fichier.extension"):
 else:
    print("Le fichier votre-nom-de-fichier existe déjà !")
 ```
-* `fonction` peut être `def get_data_from_internet(url: str, path: str, filename: str, lourd: bool) -> None:` qui va télécharger depuis l'`url` donné et le sauvegarder au `path` et au `filename`(avec extension) donné. Le paramètre `lourd` sera forcément à `false`.
+* `fonction` peut être `def get_data_from_internet(url: str, path: str, filename: str, lourd: bool) -> None:` qui va télécharger depuis l'`url` donnée et le sauvegarder au `path` et au `filename`(avec extension) donné. Le paramètre `lourd` sera forcément à `false`.
 * `fonction` peut aussi être une fonction que vous pouvez créer et faire du scraping depuis le fichier `scraping.py` où il y a toutes les fonctions dont vous avez besoin pour scraper le site que vous voulez.
 
 Vous pouvez maintenant étendre le dashboard comme bon vous semble !

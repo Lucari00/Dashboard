@@ -2,7 +2,7 @@
 
 ## Déploiement et Utilisation du Dashboard
 
-Pour déployer et utiliser le dashboard sur une autre machine, suivez les étapes ci-dessous :
+Pour déployer et utiliser le dashboard, suivez les étapes ci-dessous :
 
 ### Prérequis
 

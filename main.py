@@ -34,10 +34,10 @@ couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees))
 # Couleur de fond
 BG_COLOR = '#FCF5ED'
 
-global accident
-global geo_data_92
-global driving_schools
-global radars
+accident = None
+geo_data_92 = None
+driving_schools = None
+radars = None
 
 async def main() -> None:
     """
@@ -110,7 +110,7 @@ async def main() -> None:
 
         # Contenant de la carte des accidents en fonction du mois et de l'année
         html.Div(children=[html.Iframe(id='map', srcDoc=None, width='80%', height='500px',
-                                       style={'border': f'2px solid #FFA500'})],
+                                       style={'border': '2px solid #FFA500'})],
                             style={'height': '500px', 'width': '100%',
                                    'margin-bottom': '15px',
                                    'justify-content': 'center', 'align-items':
@@ -224,7 +224,7 @@ async def main() -> None:
         # Contenant de la carte choroplèthe
         html.Div(children=[html.Iframe(id='map-choropleth', srcDoc=choropleth_map,
                                        width='80%', height='500px',
-                                       style={'border': f'2px solid #FFA500'})],
+                                       style={'border': '2px solid #FFA500'})],
                         style={'height': '500px', 'width': '100%',
                                'margin-bottom': '15px',
                                'justify-content': 'center', 'align-items':
@@ -395,12 +395,12 @@ def update_graphique(year: int) -> dict:
     nombre_accident = []
     for hour in range(24):
         nombre_accident.append(heure.count(hour))
-    heure = [hour for hour in range(24)]
+    heure = list(range(24))
 
     # graphique du nombre d'accidents en fonction de l'heure
     return {
         'data': [
-            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers', line=dict(color='#EEDD00'))
+            go.Scatter(x=heure, y=nombre_accident, mode='lines+markers', line=dict({"color": '#EEDD00'}))
         ],
         'layout': go.Layout(
             title=f'Nombre d\'accidents par heure de la journée en {year}',
@@ -428,11 +428,12 @@ def on_play_button_click(n_clicks: int) -> tuple:
             bool: Si le slider est désactivé ou non
             str: Le texte du bouton
     """
-    if n_clicks is None: return False, '⏸️'
+    if n_clicks is None: 
+        return False, '⏸️'
     if n_clicks % 2 == 1:
         return True, '▶️'
-    else:
-        return False, '⏸️'
+    
+    return False, '⏸️'
 
 # Callback pour mettre à jour la carte des accidents en fonction du mois et de l'année
 @app.callback(
@@ -457,16 +458,17 @@ def update_map(year: int, month: int) -> tuple:
     """
     m = create_map(accident, year, month)
 
-    accidentYear = accident[accident['date'].dt.year == year]
-    accidentYearMonth = accidentYear[accidentYear['date'].dt.month == month]
+    accident_year = accident[accident['date'].dt.year == year]
+    accident_year_month = accident_year[accident_year['date'].dt.month == month]
 
     # récupérer le nom du mois en français
     month_name = calendar.month_name[month]
 
     return (m,
-            f'''Nombre d'accidents pendant cette période: {len(accidentYearMonth)}''',
+            f'''Nombre d'accidents pendant cette période: {len(accident_year_month)}''',
             f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en '''
             f'''{month_name} {year}.''')
+
 def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
     """
         Crée une carte avec les accidents de la route en fonction du mois et de l'année
@@ -488,7 +490,7 @@ def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
     center_lon = accident_year_month['geometry'].apply(lambda geom: geom.x).mean()
     m = folium.Map(location=[center_lat,center_lon], zoom_start=13)
 
-    for index, row in accident_year_month.iterrows():
+    for _, row in accident_year_month.iterrows():
         popup_content = f"""<div style='white-space: pre-wrap; width: 200px;'>
 <b>📍  Adresse</b> : {row['adresse']}<br>
 <b>📅 Date</b> : {row['date'].date()}<br>
@@ -512,7 +514,7 @@ def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
 
     # Ajout des radars que du 92
     radars_92 = radars[radars['departement'] == '92']
-    for index, row in radars_92.iterrows():
+    for _, row in radars_92.iterrows():
         popup_content = """
 <div style='white-space: pre-wrap; width: 200px;'>
 """

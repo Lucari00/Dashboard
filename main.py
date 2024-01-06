@@ -29,7 +29,10 @@ couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) for com
 # Couleur de fond
 bg_color = '#FCF5ED'
 
-async def main():
+async def main() -> None:
+    """
+        Fonction principale qui récupère les données et qui crée le dashboard
+    """
     global accident
     global geo_data_92
     global driving_schools
@@ -186,6 +189,12 @@ async def main():
 
 # Fonction pour créer l'histogramme de la gravité des accidents par heure
 def create_histogram_gravity_by_hour() -> go.Figure:
+    """
+        Crée l'histogramme de la gravité des accidents par heure
+
+        Returns:
+            go.Figure: L'histogramme de la gravité des accidents par heure
+    """
     accident_heure = accident.copy()
 
     accident_heure['heure'] = pd.to_datetime(accident['heure'], format='%H:%M:%S').dt.hour
@@ -240,7 +249,17 @@ def create_histogram_gravity_by_hour() -> go.Figure:
         Input('interval', 'n_intervals'),
         State('year-slider', 'value')
     )
-def on_tick(_, year):
+def on_tick(_: int, year: int) -> int:
+    """
+        Gère l'intervalle et le slider dynamique
+
+        Args:
+            _: Le nombre d'intervalle
+            year (int): L'année
+
+        Returns:
+            int: L'année
+    """
     years = sorted(accident['date'].dt.year.unique())
     year_index = years.index(year)
     return years[year_index + 1 if year_index + 1 < len(years) else 0]
@@ -250,7 +269,16 @@ def on_tick(_, year):
     Output(component_id='histogramme-accidents', component_property='figure'),
     Input(component_id='year-slider', component_property='value')
 )
-def update_histogramme(year):
+def update_histogramme(year: int) -> dict:
+    """
+        Met à jour l'histogramme des accidents par mois
+
+        Args:
+            year (int): L'année
+
+        Returns:
+            dict: Le dictionnaire qui contient les données et le layout de l'histogramme
+    """
     accident_year = accident[accident['date'].dt.year == year]
 
     return {
@@ -278,7 +306,16 @@ def update_histogramme(year):
     Output(component_id='graphique-accidents-heures', component_property='figure'),
     Input(component_id='year-slider', component_property='value')
 )
-def update_graphique(year):
+def update_graphique(year: int) -> dict:
+    """
+        Met à jour la courbe du nombre d'accidents par heure
+
+        Args:
+            year (int): L'année
+
+        Returns:
+            dict: Le dictionnaire qui contient les données et le layout du graphique
+    """
     accident_year = accident[accident['date'].dt.year == year]
     # trier par heure
     accident_year = accident_year.sort_values(by=['heure'])
@@ -309,7 +346,17 @@ def update_graphique(year):
     Output('play-button', 'children'),
     Input('play-button', 'n_clicks'),
 )
-def on_play_button_click(n_clicks):
+def on_play_button_click(n_clicks: int) -> tuple:
+    """
+        Gère le bouton pour stopper le slider dynamique
+
+        Args:
+            n_clicks (int): Le nombre de clics sur le bouton
+
+        Returns:
+            bool: Si le slider est désactivé ou non
+            str: Le texte du bouton
+    """
     if n_clicks is None: return False, '⏸️'
     if n_clicks % 2 == 1:
         return True, '▶️'
@@ -324,7 +371,19 @@ def on_play_button_click(n_clicks):
     Input(component_id='year-dropdown', component_property='value'),
     Input(component_id='month-dropdown', component_property='value')
 )
-def update_map(year, month):
+def update_map(year: int, month: int) -> tuple:
+    """
+        Met à jour la carte des accidents en fonction du mois et de l'année
+
+        Args:
+            year (int): L'année
+            month (int): Le mois
+
+        Returns:
+            str: Le code HTML de la carte
+            str: Le nombre d'accidents pendant cette période
+            str: Le titre de la carte
+    """
     m = create_map(accident, year, month)
 
     accidentYear = accident[accident['date'].dt.year == year]
@@ -333,9 +392,24 @@ def update_map(year, month):
     # récupérer le nom du mois en français
     month_name = calendar.month_name[month]
 
-    return m, f'''Nombre d'accidents pendant cette période: {len(accidentYearMonth)}''', f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.'''
+    return (m, 
+            f'''Nombre d'accidents pendant cette période: {len(accidentYearMonth)}''', 
+            f'''Carte représentant les accidents de la route dans les Hauts-de-Seine en {month_name} {year}.''')
 
-def create_map(data, year, month):
+def create_map(data: geopandas.GeoDataFrame, year: int, month: int) -> str:
+    """
+        Crée une carte avec les accidents de la route en fonction du mois et de l'année
+
+        Args:
+            data (geopandas.GeoDataFrame): Les données des accidents
+            year (int): L'année
+            month (int): Le mois
+
+        Returns:
+            str: Le code HTML de la carte
+    """
+
+
     accident_year = data[data['date'].dt.year == year]
     accident_year_month = accident_year[accident_year['date'].dt.month == month]
 
@@ -362,7 +436,8 @@ def create_map(data, year, month):
 
         popup_content += f"<b>{emoji_lum} Luminosité</b> : {row['luminosite']}"
         color = couleurs_par_commune.get(row['commune'], 'blue')
-        folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
+        folium.Marker(location=[row['geometry'].y, row['geometry'].x], 
+                      popup=popup_content, parse_html=True, icon=folium.Icon(color=color)).add_to(m)
 
     # Ajout des radars que du 92
     radars_92 = radars[radars['departement'] == '92']
@@ -402,6 +477,12 @@ def create_map(data, year, month):
 
 # Callback pour créer la carte choroplèthe
 def create_choropleth_map() -> str:
+    """
+        Crée une carte choroplèthe avec le nombre d'accidents par commune
+
+        Returns:
+            str: Le code HTML de la carte choroplèthe
+    """
     center_lat = accident['geometry'].apply(lambda geom: geom.y).mean()
     center_lon = accident['geometry'].apply(lambda geom: geom.x).mean()
 
@@ -435,14 +516,15 @@ def create_choropleth_map() -> str:
 <b>⭐ Note</b> : {row['grade']}/5
 """
         
-        folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=folium.Popup(popup_content, max_width='100%'), parse_html=True, icon=folium.Icon(color='green')).add_to(m)
+        folium.Marker(location=[row['geometry'].y, row['geometry'].x], popup=folium.Popup(popup_content, max_width='100%'), 
+                      parse_html=True, icon=folium.Icon(color='green')).add_to(m)
 
     legend_html = """
-<div style="position: fixed; 
-            top: 10px; 
-            left: 50px;  
-            border:2px solid grey; 
-            z-index:9999; 
+<div style="position: fixed;
+            top: 10px;
+            left: 50px;
+            border:2px solid grey;
+            z-index:9999;
             font-size:14px;
             background-color: white;">
     <div style="color: green;">🏫 Auto école </div>

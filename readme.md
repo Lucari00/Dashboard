@@ -33,8 +33,6 @@ Assurez-vous d'avoir les éléments suivants installés sur votre machine :
 
 3. Le dashboard sera accessible via un navigateur web à l'adresse [http://127.0.0.1:8050/](http://127.0.0.1:8050/).
 
-4. Utilisez les menus déroulants pour sélectionner l'année et le mois afin de visualiser les données sur les accidents de la route dans les Hauts-de-Seine.
-
 # Rapport d'Analyse
 
 - Dans la première carte, nous pouvons observer la localisation des accidents par mois ainsi que la position des radars. D'après cette carte, nous ne pouvons pas déduire de corrélation directe entre les accidents et les radars. En effet, les radars n'opèrent que sur une route dans un sens de circulation et il est difficile de distinguer ces informations sur la carte.
@@ -64,21 +62,19 @@ Le code du dashboard est structuré comme suit :
 
 ## Modification ou Extension du Code
 
-- **Personnalisation des couleurs :** Vous pouvez ajuster les couleurs utilisées possible pour représenter chaque commune en modifiant la variable `couleurs_acceptees` dans le fichier `main.py`. Vous avez la possibilité d'ajuster les couleurs utilisées pour représenter chaque commune en modifiant la variable couleurs_acceptees dans le fichier main.py. Ces couleurs seront attribuées de manière aléatoire à chaque commune à chaque exécution du programme.
-```
-couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 'darkpurple', 'purple', 'lightgreen', 'red', 'lightblue', 'orange', 'black', 'cadetblue', 'pink', 'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
-```
+- **Personnalisation des couleurs :** Vous pouvez ajuster les couleurs utilisées possible pour représenter chaque commune en modifiant la variable `couleurs_acceptees` dans le fichier `main.py`. Vous avez la possibilité d'ajuster les couleurs utilisées pour représenter chaque commune en modifiant la variable couleurs_acceptees dans le fichier main.py. Ces couleurs seront attribuées de manière aléatoire à chaque commune au début de chaque exécution du programme.
 
 - **Ajout de nouvelles fonctionnalités :** Pour ajouter de nouvelles fonctionnalités au dashboard, vous pouvez ajouter dans le `main.py` à la variable `app.layout` tous les éléments html que vous souhaitez. Ensuite, vous pouvez aussi rajouter vos propres graphiques ou cartes. Pour simplifier la structure du code, nous vous recommandons de créer une fonction qui va renvoyer l'élément à afficher. Pour ajouter des éléments dynamiques, créer un `@app.callback`, avec les entrées et sorties qu'il vous faut.
 
-- **Extension des fonctionnalités de récupération de données :** Si vous avez besoin de récupérer des données supplémentaires ou de les traiter différemment, vous pouvez modifier les fonctions du fichier `get_data.py`. Il suffit de rajouter les tests dans le `with ThreadPoolExecutor(max_workers=3) as executor:` avec des lignes comme suit : 
+- **Extension des fonctionnalités de récupération de données :** Si vous avez besoin de récupérer des données supplémentaires ou de les traiter différemment, vous pouvez modifier les fonctions du fichier `get_data.py`. Il suffit de rajouter les tests dans le
+`with ThreadPoolExecutor(max_workers=3) as executor:` avec des lignes comme suit : 
 ```
 if not path.exists("data/votre-nom-de-fichier.extension"):
    executor.submit(fonction, parametre1, parametre2,)
 else:
    print("Le fichier votre-nom-de-fichier existe déjà !")
 ```
-où `fonction` peut être `def get_data_from_internet(url: str, path: str, filename: str, lourd: bool) -> None:` qui va télécharger depuis l'`url` donné et le sauvegarder au `path` et au `filename`(avec extension) donné. Le paramètre `lourd` sera forcément à `false`.
-Ou `fonction` peut aussi être une fonction que vous pouvez créer et faire du scraping depuis le fichier `scraping.py` où il y a toutes les fonctions dont vous avez besoin pour scraper le site que vous voulez.
+* `fonction` peut être `def get_data_from_internet(url: str, path: str, filename: str, lourd: bool) -> None:` qui va télécharger depuis l'`url` donné et le sauvegarder au `path` et au `filename`(avec extension) donné. Le paramètre `lourd` sera forcément à `false`.
+* `fonction` peut aussi être une fonction que vous pouvez créer et faire du scraping depuis le fichier `scraping.py` où il y a toutes les fonctions dont vous avez besoin pour scraper le site que vous voulez.
 
-N'hésitez pas à explorer et à expérimenter pour personnaliser le dashboard en fonction de vos besoins spécifiques.
+Vous pouvez maintenant étendre le dashboard comme bon vous semble !

@@ -1,5 +1,6 @@
 import time
-import geopandas, pandas as pd
+import geopandas
+import pandas as pd
 import folium
 import random
 from get_data import get_data
@@ -23,15 +24,20 @@ communes_hauts_de_seine = [
 ]
 
 # Génère des couleurs aléatoires pour chaque commune
-couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray', 
-                      'darkpurple', 'purple', 'lightgreen', 'red', 
-                      'lightblue', 'orange', 'black', 'cadetblue', 'pink', 
+couleurs_acceptees = {'green', 'darkgreen', 'darkblue', 'gray',
+                      'darkpurple', 'purple', 'lightgreen', 'red',
+                      'lightblue', 'orange', 'black', 'cadetblue', 'pink',
                       'lightred', 'lightgray', 'beige', 'blue', 'darkred'}
-couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees)) 
+couleurs_par_commune = {commune: random.choice(list(couleurs_acceptees))
                         for commune in communes_hauts_de_seine}
 
 # Couleur de fond
-bg_color = '#FCF5ED'
+BG_COLOR = '#FCF5ED'
+
+global accident
+global geo_data_92
+global driving_schools
+global radars
 
 async def main() -> None:
     """
@@ -99,7 +105,8 @@ async def main() -> None:
                 children=(
                     '''Carte représentant les accidents de la route dans les Hauts-de-Seine '''
                     '''en avril 2019.'''
-                ),                style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
+                ),
+                style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
 
         # Contenant de la carte des accidents en fonction du mois et de l'année
         html.Div(children=[html.Iframe(id='map', srcDoc=None, width='80%', height='500px',
@@ -110,7 +117,7 @@ async def main() -> None:
                                    'center', 'display': 'flex'}),
 
         # Texte qui affiche le nombre d'accidents en fonction du mois et de l'année
-        html.Div(id='text-number-accident', 
+        html.Div(id='text-number-accident',
                  children=['''Nombre d'accidents pendant cette période : '''],
                  style={'textAlign': 'center', 'color': "#503D36", 'margin-bottom': '15px'}),
 
@@ -224,7 +231,7 @@ async def main() -> None:
                                'center', 'display': 'flex'}),
 
     ], style={'width': '100%', 'padding': '0', 'padding-bottom':
-              '15px', 'font-family': 'Helvetica', 'background-color': bg_color})
+              '15px', 'font-family': 'Helvetica', 'background-color': BG_COLOR})
 
 # Fonction pour créer l'histogramme de la gravité des accidents par heure
 def create_histogram_gravity_by_hour() -> go.Figure:
@@ -300,14 +307,14 @@ def create_histogram_gravity_by_hour() -> go.Figure:
         )
 
     fig.update_layout(
-        paper_bgcolor=bg_color,
-        plot_bgcolor=bg_color
+        paper_bgcolor=BG_COLOR,
+        plot_bgcolor=BG_COLOR
     )
 
     return fig
 
 # Callback pour gérer l'intervalle et le slider dynamique
-@callback(
+@app.callback(
         Output('year-slider', 'value'),
         Input('interval', 'n_intervals'),
         State('year-slider', 'value')
@@ -360,8 +367,8 @@ def update_histogramme(year: int) -> dict:
             title=f'Nombre d\'accidents par mois en {year}',
             xaxis={'title': 'Mois'},
             yaxis={'title': 'Nombre d\'accidents'},
-            plot_bgcolor=bg_color,
-            paper_bgcolor=bg_color
+            plot_bgcolor=BG_COLOR,
+            paper_bgcolor=BG_COLOR
         )
     }
 
@@ -399,8 +406,8 @@ def update_graphique(year: int) -> dict:
             title=f'Nombre d\'accidents par heure de la journée en {year}',
             xaxis={'title': 'Heure'},
             yaxis={'title': 'Nombre d\'accidents'},
-            plot_bgcolor=bg_color,
-            paper_bgcolor=bg_color
+            plot_bgcolor=BG_COLOR,
+            paper_bgcolor=BG_COLOR
         )
     }
 

@@ -30,7 +30,7 @@ async def get_data() -> None:
         if not path.exists("data/big_accidents.geojson"):
             executor.submit(
                 get_data_from_internet,
-                "https://www.data.gouv.fr/fr/datasets/r/19b9f9d1-e24b-47f5-b908-e287339173b3",
+                "https://opendata.hauts-de-seine.fr/api/explore/v2.1/catalog/datasets/accidents-corporels-de-la-circulation-routiere/exports/geojson?lang=fr&timezone=Europe%2FBerlin",
                 "data/big_accidents.geojson",
                 "big_accidents",
                 True)
